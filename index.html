@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拓新业务周例会 - 结构化看板</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #4f46e5; --primary-light: #eef2ff; --success: #10b981;
+  --warning: #f59e0b; --danger: #ef4444; --info: #3b82f6;
+  --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+  --gray-300: #d1d5db; --gray-500: #6b7280; --gray-700: #374151;
+  --gray-900: #111827; --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--gray-50); color: var(--gray-900); line-height: 1.6; }
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 32px 0; margin-bottom: 24px; border-radius: 0 0 24px 24px; }
+header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+header h1 { font-size: 28px; font-weight: 700; }
+header .meta { display: flex; gap: 20px; font-size: 14px; opacity: .9; flex-wrap: wrap; }
+header .meta span { display: flex; align-items: center; gap: 6px; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.badge-purple { background: rgba(255,255,255,.2); color: white; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; background: white; padding: 6px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; overflow-x: auto; }
+.tab { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--gray-500); transition: all .2s; white-space: nowrap; border: none; background: none; }
+.tab:hover { color: var(--gray-700); background: var(--gray-100); }
+.tab.active { background: var(--primary); color: white; }
+.tab-content { display: none; } .tab-content.active { display: block; }
+
+/* Cards */
+.card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; }
+.card h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card h3 .icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+
+/* Sales Rep Cards */
+.rep-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; transition: transform .2s, box-shadow .2s; }
+.rep-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.rep-header { padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--gray-100); }
+.rep-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 16px; }
+.rep-name { font-weight: 600; font-size: 15px; }
+.rep-role { font-size: 12px; color: var(--gray-500); }
+.rep-body { padding: 16px 20px; }
+.rep-body h4 { font-size: 13px; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin: 12px 0 8px; }
+.rep-body h4:first-child { margin-top: 0; }
+.rep-body ul { list-style: none; padding: 0; }
+.rep-body li { font-size: 13px; padding: 4px 0; padding-left: 16px; position: relative; color: var(--gray-700); }
+.rep-body li::before { content: ""; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+
+/* Kanban */
+.kanban { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; overflow-x: auto; min-height: 400px; }
+.kanban-col { background: var(--gray-100); border-radius: var(--radius); padding: 12px; }
+.kanban-col-header { font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.kanban-col-header .count { background: rgba(0,0,0,.1); padding: 1px 8px; border-radius: 10px; font-size: 11px; }
+.kanban-card { background: white; border-radius: 8px; padding: 12px; margin-bottom: 8px; box-shadow: var(--shadow); cursor: grab; transition: transform .15s; font-size: 13px; }
+.kanban-card:hover { transform: scale(1.02); }
+.kanban-card .title { font-weight: 600; margin-bottom: 6px; }
+.kanban-card .owner { font-size: 11px; color: var(--gray-500); display: flex; align-items: center; gap: 4px; }
+.kanban-card .value { font-size: 12px; color: var(--primary); font-weight: 500; margin-top: 4px; }
+.kanban-card .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 10px; margin-top: 4px; }
+
+/* Todo */
+.todo-list { list-style: none; }
+.todo-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; background: var(--gray-50); transition: background .2s; }
+.todo-item:hover { background: var(--primary-light); }
+.todo-checkbox { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--gray-300); cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all .2s; display: flex; align-items: center; justify-content: center; }
+.todo-checkbox.checked { background: var(--success); border-color: var(--success); }
+.todo-checkbox.checked::after { content: "\2713"; color: white; font-size: 12px; }
+.todo-text { font-size: 14px; flex: 1; }
+.todo-text.done { text-decoration: line-through; color: var(--gray-500); }
+.todo-owner { font-size: 12px; padding: 2px 8px; border-radius: 12px; background: var(--primary-light); color: var(--primary); font-weight: 500; white-space: nowrap; }
+
+/* Charts */
+.chart-container { position: relative; height: 300px; width: 100%; }
+.chart-container-sm { position: relative; height: 250px; width: 100%; }
+
+/* Stats */
+.stat-card { text-align: center; padding: 20px; background: white; border-radius: var(--radius); box-shadow: var(--shadow); }
+.stat-value { font-size: 32px; font-weight: 700; color: var(--primary); }
+.stat-label { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+
+/* Decisions */
+.decision-item { padding: 16px; border-left: 4px solid var(--primary); background: var(--primary-light); border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+.decision-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.decision-item p { font-size: 13px; color: var(--gray-700); }
+
+/* Editable */
+[contenteditable="true"] { outline: none; border-radius: 4px; transition: background .2s, box-shadow .2s; }
+[contenteditable="true"]:hover { background: rgba(79, 70, 229, .05); }
+[contenteditable="true"]:focus { background: rgba(79, 70, 229, .08); box-shadow: 0 0 0 2px rgba(79, 70, 229, .2); }
+.edit-hint { font-size: 11px; color: var(--gray-500); text-align: right; margin-top: 8px; opacity: .7; }
+
+/* Toolbar */
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+.toolbar .hint { font-size: 12px; color: var(--gray-500); }
+.btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .2s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: #4338ca; }
+.btn-outline { background: white; border: 1px solid var(--gray-200); color: var(--gray-700); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Market Insights */
+.insight-card { padding: 16px; background: linear-gradient(135deg, #fef3c7, #fde68a); border-radius: var(--radius); margin-bottom: 12px; }
+.insight-card h4 { font-size: 14px; font-weight: 600; color: #92400e; margin-bottom: 6px; }
+.insight-card p { font-size: 13px; color: #78350f; }
+
+@media (max-width: 768px) {
+  .kanban { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr; }
+  header h1 { font-size: 22px; }
+  .container { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div>
+      <h1 contenteditable="true">拓新业务周例会</h1>
+      <div class="meta">
+        <span>&#128197; 2026-07-27 16:56</span>
+        <span>&#9201; 约35分钟</span>
+        <span>&#128101; 7人参会</span>
+        <span class="badge badge-purple">周例会</span>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:13px;opacity:.8">参会成员</div>
+      <div style="font-size:14px;margin-top:4px">张新 | 张怡薇 | 孙佳润 | 小乖 | Nick潘军 | 何柯 | 安春晓</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">&#128202; 总览</button>
+    <button class="tab" onclick="switchTab('sales')">&#128188; 销售进展</button>
+    <button class="tab" onclick="switchTab('kanban')">&#128203; 客户看板</button>
+    <button class="tab" onclick="switchTab('todos')">&#9989; 待办事项</button>
+    <button class="tab" onclick="switchTab('dashboard')">&#128200; 数据看板</button>
+    <button class="tab" onclick="switchTab('decisions')">&#128161; 关键决策</button>
+  </div>
+
+  <!-- Overview Tab -->
+  <div id="tab-overview" class="tab-content active">
+    <div class="grid-5" style="margin-bottom:24px">
+      <div class="stat-card"><div class="stat-value">5</div><div class="stat-label">销售成员</div></div>
+      <div class="stat-card"><div class="stat-value">15+</div><div class="stat-label">在跟客户</div></div>
+      <div class="stat-card"><div class="stat-value">8</div><div class="stat-label">本周待办</div></div>
+      <div class="stat-card"><div class="stat-value">~400万</div><div class="stat-label">潜在年化收入</div></div>
+      <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">关键决策</div></div>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:#eef2ff">&#128221;</span> 会议摘要</h3>
+      <div contenteditable="true" style="font-size:14px;color:var(--gray-700)">
+        <p style="margin-bottom:12px">团队召开周例会，同步拓新业务进展与协作机制。会上明确了何科作为横向支持成员加入拓新 team，并制定了项目对接规则：年化收入低于50万或MaaS日均收入小于1000元的项目由商务自行闭环，无需引入SA支持。</p>
+        <p style="margin-bottom:12px">各成员汇报了上周客户拓展、调入及上量情况，并围绕大卡资源竞争、中转站客户策略、AI Lab类客户需求等展开讨论，形成以"稳定性+售后能力"为核心竞争力的拓新方向共识。</p>
+        <p><strong>核心竞争力定位：</strong>阿里云提供一键拉起的Infra调度能力（如派平台）和大厂级售后保障，优先选择无自建运维能力、需发票合规、不接受水货的客户。</p>
+      </div>
+      <div class="edit-hint">&#9998; 点击文字可直接编辑</div>
+    </div>
+    <div class="grid-2">
+      <div class="insight-card">
+        <h4>&#128161; 市场观察：大卡资源竞争</h4>
+        <p>阿里被指信用不佳，常分批交付（10~20台），而京东/百度承诺一次性给足。但阿里云H200在香港是第一批且有机房，需以稳定性和售后为突破口。</p>
+      </div>
+      <div class="insight-card">
+        <h4>&#127919; 新机会：广西省政府Token输出</h4>
+        <p>广西省政府要求地市向东南亚输出Token，要求稳定且有售后。这是一个政府级别的潜在PPL，符合团队核心竞争力定位。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sales Tab -->
+  <div id="tab-sales" class="tab-content">
+    <div class="toolbar">
+      <div class="hint">&#128161; 点击任意文字可直接编辑内容</div>
+      <button class="btn btn-outline" onclick="window.print()">&#128424; 导出打印</button>
+    </div>
+    <div class="grid-3">
+      <!-- 张新 -->
+      <div class="rep-card">
+        <div class="rep-header">
+          <div class="rep-avatar" style="background:linear-gradient(135deg,#4f46e5,#7c3aed)">新</div>
+          <div><div class="rep-name" contenteditable="true">张新（欣琦Lorena）</div><div class="rep-role">团队负责人</div></div>
+        </div>
+        <div class="rep-body" contenteditable="true">
+          <h4>本周重点进展</h4>
+          <ul>
+            <li>AI Lab合同已签署，本周完成保密协议并启动上料</li>
+            <li>推进两个纯中转站客户，日均消费约2000元</li>
+            <li>新增两个调入客户：两个中转站 + 一家泛互娱客户</li>
+            <li>GPU本周将开始上量（非MaaS）</li>
+          </ul>
+          <h4>下周计划</h4>
+          <ul>
+            <li>闭环AI Lab大颗粒度合同及上量</li>
+            <li>完成两个中转站客户的MaaS交付</li>
+            <li>深入沟通东南亚本地Infra总代</li>
+            <li>参与China Joy及出海流量峰会</li>
+          </ul>
+        </div>
+      </div>
+      <!-- 张怡薇 -->
+      <div class="rep-card">
+        <div class="rep-header">
+          <div class="rep-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">薇</div>
+          <div><div class="rep-name" contenteditable="true">张怡薇 Ivy</div><div class="rep-role">销售成员</div></div>
+        </div>
+        <div class="rep-body" contenteditable="true">
+          <h4>本周重点进展</h4>
+          <ul>
+            <li>拓新3个客户：1个H200大卡需求 + 2个中转站</li>
+            <li>H200客户月消费约200万，新增64台设备</li>
+            <li>另一中转站客户日均消费约2000元，需Kimi K3</li>
+            <li>调入两个客户</li>
+          </ul>
+          <h4>下周计划</h4>
+          <ul>
+            <li>推进H200客户的需求对接</li>
+            <li>与通义侧沟通K3在百炼平台的上架时间及折扣</li>
+            <li>继续拓展中软站类型客户</li>
+          </ul>
+        </div>
+      </div>
+      <!-- 孙佳润 -->
+      <div class="rep-card">
+        <div class="rep-header">
+          <div class="rep-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">润</div>
+          <div><div class="rep-name" contenteditable="true">孙佳润 Joey</div><div class="rep-role">销售成员</div></div>
+        </div>
+        <div class="rep-body" contenteditable="true">
+          <h4>本周重点进展</h4>
+          <ul>
+            <li>调入乐美包装，Salesforce SFDC全预付，年化约200万</li>
+            <li>中转站客户确认接入K3，配合测试TPM</li>
+            <li>魔法原子已开通L20N测试，竞对含世纪互联/腾讯</li>
+            <li>新触达"泽路世界"CTO，交流双活架构与AWS迁移</li>
+          </ul>
+          <h4>下周计划</h4>
+          <ul>
+            <li>深化与"泽路世界"技术方案交流</li>
+            <li>确认中转站客户K3/3.8max接入进展</li>
+            <li>明确乐美包装Service Cloud需求规模</li>
+            <li>摸排具身智能行业及其他特新小组资源</li>
+          </ul>
+        </div>
+      </div>
+      <!-- 小乖 -->
+      <div class="rep-card">
+        <div class="rep-header">
+          <div class="rep-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">乖</div>
+          <div><div class="rep-name" contenteditable="true">小乖 Jennie</div><div class="rep-role">销售成员</div></div>
+        </div>
+        <div class="rep-body" contenteditable="true">
+          <h4>本周重点进展</h4>
+          <ul>
+            <li>摸盘40余家客户，覆盖宁波及张江园区</li>
+            <li>新增1家调入客户：计算机软硬件企业，正在实名认证</li>
+            <li>另1家上海IPC行业客户，处理企业账号实体认证</li>
+          </ul>
+          <h4>下周计划</h4>
+          <ul>
+            <li>周四参加上海AI出海大会</li>
+            <li>周五参与签约事项</li>
+            <li>考虑参与China Joy相关活动</li>
+          </ul>
+        </div>
+      </div>
+      <!-- Nick潘军 -->
+      <div class="rep-card">
+        <div class="rep-header">
+          <div class="rep-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">N</div>
+          <div><div class="rep-name" contenteditable="true">Nick 潘军</div><div class="rep-role">销售成员</div></div>
+        </div>
+        <div class="rep-body" contenteditable="true">
+          <h4>本周重点进展</h4>
+          <ul>
+            <li>实践客户周日均有小幅上浮，推动API功能完善</li>
+            <li>Spicy业务寻找更优资源，计划线下拜访</li>
+            <li>杭州出海中转/Agent服务客户有初步合作意愿</li>
+            <li>大卡需求客户基本确认，面临京东/百度竞争</li>
+          </ul>
+          <h4>下周计划</h4>
+          <ul>
+            <li>接触创业型API插件公司，评估中转站潜力</li>
+            <li>推动实践客户API上量</li>
+            <li>线下拜访Spicy业务深度合作</li>
+            <li>跟进杭州出海Agent客户反馈</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanban Tab -->
+  <div id="tab-kanban" class="tab-content">
+    <div class="toolbar">
+      <div class="hint">&#128161; 客户按推进阶段分类 | 点击文字可编辑</div>
+      <button class="btn btn-outline" onclick="addKanbanCard()">&#43; 添加客户</button>
+    </div>
+    <div class="kanban">
+      <div class="kanban-col">
+        <div class="kanban-col-header" style="background:#dbeafe;color:#1e40af">&#128269; 初步接触 <span class="count">4</span></div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">东南亚本地Infra总代</div>
+          <div class="owner">&#128100; 张新</div>
+          <div class="tag" style="background:#dbeafe;color:#1e40af">Infra</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">泽路世界（头部眼镜出海）</div>
+          <div class="owner">&#128100; 孙佳润</div>
+          <div class="value">双活架构/AWS迁移</div>
+          <div class="tag" style="background:#fce7f3;color:#be185d">出海</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">杭州出海Agent服务客户</div>
+          <div class="owner">&#128100; Nick潘军</div>
+          <div class="tag" style="background:#d1fae5;color:#065f46">Agent</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">创业型API插件公司</div>
+          <div class="owner">&#128100; Nick潘军</div>
+          <div class="tag" style="background:#fef3c7;color:#92400e">中转站</div>
+        </div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col-header" style="background:#fef3c7;color:#92400e">&#128260; 方案对接 <span class="count">4</span></div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">H200大卡需求客户</div>
+          <div class="owner">&#128100; 张怡薇</div>
+          <div class="value">月消费~200万 / 64台</div>
+          <div class="tag" style="background:#ede9fe;color:#5b21b6">GPU</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">魔法原子</div>
+          <div class="owner">&#128100; 孙佳润</div>
+          <div class="value">L20N测试中 / 竞对3家</div>
+          <div class="tag" style="background:#ede9fe;color:#5b21b6">GPU+MaaS</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">中转站客户（需K3）</div>
+          <div class="owner">&#128100; 张怡薇</div>
+          <div class="value">日均~2000元</div>
+          <div class="tag" style="background:#fef3c7;color:#92400e">MaaS</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">广西省政府Token输出</div>
+          <div class="owner">&#128100; Nick潘军</div>
+          <div class="value">政府级PPL</div>
+          <div class="tag" style="background:#d1fae5;color:#065f46">政府</div>
+        </div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col-header" style="background:#d1fae5;color:#065f46">&#9889; 测试/上量 <span class="count">3</span></div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">中转站客户（K3接入）</div>
+          <div class="owner">&#128100; 孙佳润</div>
+          <div class="value">今日配合测试TPM</div>
+          <div class="tag" style="background:#fef3c7;color:#92400e">MaaS</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">实践客户（API上量）</div>
+          <div class="owner">&#128100; Nick潘军</div>
+          <div class="value">周日均小幅上浮</div>
+          <div class="tag" style="background:#fef3c7;color:#92400e">API</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">Spicy业务客户</div>
+          <div class="owner">&#128100; Nick潘军</div>
+          <div class="value">计划线下拜访</div>
+          <div class="tag" style="background:#dbeafe;color:#1e40af">深度合作</div>
+        </div>
+      </div>
+      <div class="kanban-col">
+        <div class="kanban-col-header" style="background:#ede9fe;color:#5b21b6">&#127881; 签约/交付 <span class="count">3</span></div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">AI Lab</div>
+          <div class="owner">&#128100; 张新</div>
+          <div class="value">合同已签 / 本周上料</div>
+          <div class="tag" style="background:#ede9fe;color:#5b21b6">大颗粒</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">乐美包装</div>
+          <div class="owner">&#128100; 孙佳润</div>
+          <div class="value">年化~200万 / SFDC全预付</div>
+          <div class="tag" style="background:#d1fae5;color:#065f46">Salesforce</div>
+        </div>
+        <div class="kanban-card" contenteditable="true">
+          <div class="title">上海IPC行业客户</div>
+          <div class="owner">&#128100; 小乖</div>
+          <div class="value">企业账号认证中</div>
+          <div class="tag" style="background:#dbeafe;color:#1e40af">IPC</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Todos Tab -->
+  <div id="tab-todos" class="tab-content">
+    <div class="toolbar">
+      <div class="hint">&#128161; 点击圆圈可标记完成 | 点击文字可编辑</div>
+      <button class="btn btn-outline" onclick="addTodo()">&#43; 添加待办</button>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:#d1fae5">&#9989;</span> 本周行动项（8项）</h3>
+      <ul class="todo-list" id="todoList">
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">跟进H200商机需求对接，推进Kimi K3与通义侧沟通并申请百炼折扣，继续拓展中转站类型客户</span><span class="todo-owner">张怡薇</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">参加周四上海AI出海大会和周五签约活动</span><span class="todo-owner">小乖</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">跟进北大信息技术研究院卡需求，梳理游戏客户潜力名单并分发，准备飞书深诺战略合作议题</span><span class="todo-owner">张新</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">确认乐美包装Salesforce新Service Cloud需求量，配合中转站客户K3接入测试，跟进魔法原子L20N测试及GPU加语音和MaaS打包模块攻坚，详细交流泽路世界双活或从AWS搬迁方案</span><span class="todo-owner">孙佳润</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">推动实践客户API功能完善以上量，线下拜访推进Spicy业务深度绑定合作，跟进杭州出海Agent服务客户反馈，处理大卡客户需求意愿度问题</span><span class="todo-owner">Nick潘军</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">上线agent用于周会过程监控，并与何科共同完成agent搭建</span><span class="todo-owner">张新</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">参加China Joy及出海流量峰会</span><span class="todo-owner">小乖</span></li>
+        <li class="todo-item"><div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">带团队成员对接无影PDIC介绍商机</span><span class="todo-owner">张新</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Dashboard Tab -->
+  <div id="tab-dashboard" class="tab-content">
+    <div class="grid-2">
+      <div class="card">
+        <h3><span class="icon" style="background:#ede9fe">&#128200;</span> 各销售客户数量分布</h3>
+        <div class="chart-container"><canvas id="chartCustomers"></canvas></div>
+      </div>
+      <div class="card">
+        <h3><span class="icon" style="background:#d1fae5">&#128176;</span> 潜在年化收入估算（万元）</h3>
+        <div class="chart-container"><canvas id="chartRevenue"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3><span class="icon" style="background:#fef3c7">&#128202;</span> 客户阶段分布</h3>
+        <div class="chart-container-sm"><canvas id="chartStage"></canvas></div>
+      </div>
+      <div class="card">
+        <h3><span class="icon" style="background:#dbeafe">&#127919;</span> 业务类型占比</h3>
+        <div class="chart-container-sm"><canvas id="chartType"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:#fce7f3">&#128205;</span> 本周待办分配</h3>
+      <div class="chart-container-sm"><canvas id="chartTodos"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Decisions Tab -->
+  <div id="tab-decisions" class="tab-content">
+    <div class="card">
+      <h3><span class="icon" style="background:#fef3c7">&#128161;</span> 关键决策与共识</h3>
+      <div contenteditable="true">
+        <div class="decision-item">
+          <h4>1. 拓新客户筛选标准明确</h4>
+          <p>放弃与纯中转水货市场的价格竞争，聚焦对稳定性与售后服务有强需求的客户群体。优先选择无自建运维能力、需发票合规、不接受水货的客户（如高校研究机构、初创AI Lab等）。</p>
+        </div>
+        <div class="decision-item">
+          <h4>2. 客户分类管理口径统一</h4>
+          <p>"拓新"定义为此前库内无记录或账户消费接近零的客户；已有消费基础的客户回流属于Winback或攻坚范畴，不计入拓新PPL。此标准由张新提出并被全体接受。</p>
+        </div>
+        <div class="decision-item">
+          <h4>3. 外部活动参与策略</h4>
+          <p>大型行业峰会（如China Joy）全员积极参与；中小型厂商活动需提前明确目标，只有能通过熟人引荐精准对接关键人时才值得投入。</p>
+        </div>
+        <div class="decision-item">
+          <h4>4. 渠道资源整合机制启动</h4>
+          <p>张新主导飞书深诺战略合作，Call High至CEO层级推动互换客户资源。SMB与电商线销售团队可直接对接拓新成员，按赛道分工协作。群内共享PDIC商机清单作为拓新线索来源。</p>
+        </div>
+      </div>
+      <div class="edit-hint">&#9998; 点击文字可直接编辑</div>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:#d1fae5">&#128220;</span> 项目对接规则</h3>
+      <div contenteditable="true" style="font-size:14px;color:var(--gray-700)">
+        <p style="margin-bottom:8px"><strong>何科（横向支持）加入规则：</strong></p>
+        <p style="margin-bottom:8px">&#8226; 年化低于50万的项目 → 商务团队自主闭环，不需联系何科</p>
+        <p>&#8226; MaaS日均收入小于1000元的项目 → 前期商务跟进，关键卡点后再引入何科支持</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer style="text-align:center;padding:32px;color:var(--gray-500);font-size:12px">
+  <p>数据来源：钉钉AI听记 | 会议时间：2026-07-27 | 自动生成于 2026-07-28</p>
+  <p style="margin-top:4px">所有内容均可直接点击编辑 | 编辑后刷新页面将恢复原始数据</p>
+</footer>
+
+<script>
+// Tab switching
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'dashboard') setTimeout(initCharts, 100);
+}
+
+// Todo toggle
+function toggleTodo(el) {
+  el.classList.toggle('checked');
+  const text = el.nextElementSibling;
+  text.classList.toggle('done');
+}
+
+// Add todo
+function addTodo() {
+  const list = document.getElementById('todoList');
+  const li = document.createElement('li');
+  li.className = 'todo-item';
+  li.innerHTML = '<div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">新待办事项...</span><span class="todo-owner" contenteditable="true">负责人</span>';
+  list.appendChild(li);
+}
+
+// Add kanban card
+function addKanbanCard() {
+  const col = document.querySelector('.kanban-col');
+  const card = document.createElement('div');
+  card.className = 'kanban-card';
+  card.contentEditable = true;
+  card.innerHTML = '<div class="title">新客户名称</div><div class="owner">&#128100; 负责人</div><div class="tag" style="background:#dbeafe;color:#1e40af">标签</div>';
+  col.appendChild(card);
+}
+
+// Charts
+let chartsInitialized = false;
+function initCharts() {
+  if (chartsInitialized) return;
+  chartsInitialized = true;
+  const colors = ['#4f46e5','#ec4899','#10b981','#f59e0b','#3b82f6'];
+
+  // Customers per rep
+  new Chart(document.getElementById('chartCustomers'), {
+    type: 'bar',
+    data: {
+      labels: ['张新', '张怡薇', '孙佳润', '小乖', 'Nick潘军'],
+      datasets: [{
+        label: '在跟客户数',
+        data: [5, 4, 5, 3, 4],
+        backgroundColor: colors.map(c => c + '33'),
+        borderColor: colors,
+        borderWidth: 2, borderRadius: 8
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+
+  // Revenue
+  new Chart(document.getElementById('chartRevenue'), {
+    type: 'bar',
+    data: {
+      labels: ['张新\n(AI Lab)', '张怡薇\n(H200)', '孙佳润\n(乐美)', 'Nick潘军\n(实践+Spicy)', '小乖\n(新客户)'],
+      datasets: [{
+        label: '潜在年化收入（万元）',
+        data: [80, 200, 200, 50, 20],
+        backgroundColor: colors.map(c => c + '55'),
+        borderColor: colors,
+        borderWidth: 2, borderRadius: 8
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
+
+  // Stage distribution
+  new Chart(document.getElementById('chartStage'), {
+    type: 'doughnut',
+    data: {
+      labels: ['初步接触', '方案对接', '测试/上量', '签约/交付'],
+      datasets: [{ data: [4, 4, 3, 3], backgroundColor: ['#93c5fd','#fcd34d','#6ee7b7','#c4b5fd'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+  });
+
+  // Business type
+  new Chart(document.getElementById('chartType'), {
+    type: 'pie',
+    data: {
+      labels: ['GPU/大卡', 'MaaS/中转站', 'API/Agent', 'Salesforce', 'Infra/其他'],
+      datasets: [{ data: [3, 4, 3, 1, 3], backgroundColor: ['#8b5cf6','#f59e0b','#10b981','#3b82f6','#ec4899'], borderWidth: 0 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+  });
+
+  // Todos per person
+  new Chart(document.getElementById('chartTodos'), {
+    type: 'bar',
+    data: {
+      labels: ['张新', '孙佳润', 'Nick潘军', '小乖', '张怡薇'],
+      datasets: [{
+        label: '待办数量',
+        data: [3, 1, 1, 2, 1],
+        backgroundColor: ['#4f46e533','#10b98133','#3b82f633','#f59e0b33','#ec489933'],
+        borderColor: ['#4f46e5','#10b981','#3b82f6','#f59e0b','#ec4899'],
+        borderWidth: 2, borderRadius: 8
+      }]
+    },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  });
+}
+</script>
+</body>
+</html>
