@@ -82,6 +82,24 @@ header h1{font-size:26px;font-weight:700}
 .btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s}
 .btn-outline{background:#fff;border:1px solid var(--gray-200);color:var(--gray-700)}
 .btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.leads-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.leads-toolbar select,.leads-toolbar input{padding:7px 12px;border-radius:8px;border:1px solid var(--gray-200);font-size:13px;background:#fff;color:var(--gray-700)}
+.leads-toolbar input{flex:1;min-width:160px}
+.leads-table-wrap{overflow-x:auto;border-radius:var(--radius)}
+table.leads{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+table.leads th{background:var(--gray-100);color:var(--gray-700);font-weight:600;text-align:left;padding:10px 12px;white-space:nowrap;border-bottom:2px solid var(--gray-200)}
+table.leads td{padding:10px 12px;border-bottom:1px solid var(--gray-100);vertical-align:top;color:var(--gray-700)}
+table.leads tr:hover td{background:var(--gray-50)}
+table.leads .company{font-weight:600;color:var(--gray-900);white-space:nowrap}
+table.leads .round-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#ede9fe;color:#5b21b6;white-space:nowrap}
+table.leads .need{max-width:280px;color:var(--gray-500);font-size:12px;line-height:1.5}
+table.leads a{color:var(--primary);text-decoration:none}
+table.leads a:hover{text-decoration:underline}
+.lead-owner{display:inline-block;min-width:64px;padding:3px 8px;border:2px dashed rgba(79,70,229,.35);border-radius:6px;background:rgba(79,70,229,.03);font-size:12px;transition:all .2s}
+.lead-owner:hover{background:rgba(79,70,229,.07);box-shadow:0 0 0 2px rgba(79,70,229,.15)}
+.lead-status{padding:4px 8px;border:2px dashed rgba(79,70,229,.35);border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s}
+.lead-status:hover{box-shadow:0 0 0 2px rgba(79,70,229,.15)}
+.batch-tag{display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;background:var(--gray-100);color:var(--gray-500);white-space:nowrap}
 footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
 @media(max-width:768px){.kanban{grid-template-columns:1fr}.grid-2,.grid-3,.grid-5{grid-template-columns:1fr}header h1{font-size:20px}.container{padding:16px}}
 </style>
@@ -117,6 +135,7 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
     <button class="tab" onclick="switchTab('todos')">&#9989; 待办事项</button>
     <button class="tab" onclick="switchTab('dashboard')">&#128200; 数据看板</button>
     <button class="tab" onclick="switchTab('decisions')">&#128161; 关键决策</button>
+    <button class="tab" onclick="switchTab('leads')">&#127919; 潜客线索</button>
   </div>
   <div id="tab-overview" class="tab-content active">
     <div class="grid-5" style="margin-bottom:20px" id="statsRow"></div>
@@ -164,6 +183,25 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
       </div>
     </div>
   </div>
+  <div id="tab-leads" class="tab-content">
+    <div class="edit-legend" style="margin-bottom:16px"><strong>&#128393; 编辑说明：</strong><span class="demo">跟进人 / 状态 = 可编辑</span><span class="demo-static">公司 / 融资信息 = 自动采集不可改</span><span>每周自动搜集约20家C轮潜客，按批次累积保留</span></div>
+    <div class="grid-5" style="margin-bottom:20px" id="leadStats"></div>
+    <div class="card">
+      <div class="leads-toolbar">
+        <select id="leadStatusFilter" onchange="renderLeads()"></select>
+        <select id="leadBatchFilter" onchange="renderLeads()"></select>
+        <input id="leadSearch" placeholder="&#128269; 搜索公司名 / 行业..." oninput="renderLeads()">
+        <button class="btn btn-outline" onclick="addLead()">&#43; 手动添加</button>
+      </div>
+      <div class="leads-table-wrap"><table class="leads"><thead><tr>
+        <th>公司</th><th>行业</th><th>轮次</th><th>融资</th><th>AI MaaS 需求点</th><th>联系方式</th><th>跟进人 &#9998;</th><th>状态 &#9998;</th><th>批次</th>
+      </tr></thead><tbody id="leadsBody"></tbody></table></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h3><span class="icon" style="background:#ede9fe">&#128202;</span> 线索状态分布</h3><div class="chart-container-sm"><canvas id="chartLeadStatus"></canvas></div></div>
+      <div class="card"><h3><span class="icon" style="background:#dbeafe">&#127981;</span> 线索行业分布</h3><div class="chart-container-sm"><canvas id="chartLeadIndustry"></canvas></div></div>
+    </div>
+  </div>
 </div>
 <footer>
   <p>数据来源：钉钉AI听记 &middot; 自动生成于 2026-07-28 &middot; 每周日 18:00 自动更新</p>
@@ -173,6 +211,33 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
 // ====== 会议数据（由定时任务每周自动追加更新） ======
 const MEETINGS=[{date:"2026-07-27",label:"2026-07-27 周例会",time:"16:56",duration:"35分钟",participants:7,summary:"团队召开周例会，同步拓新业务进展与协作机制。会上明确了何科作为横向支持成员加入拓新 team，并制定了项目对接规则：年化收入低于50万或MaaS日均收入小于1000元的项目由商务自行闭环，无需引入SA支持。各成员汇报了上周客户拓展、调入及上量情况，并围绕大卡资源竞争、中转站客户策略、AI Lab类客户需求等展开讨论，形成以\u201c稳定性+售后能力\u201d为核心竞争力的拓新方向共识。<br><br><strong>核心竞争力定位：</strong>阿里云提供一键拉起的Infra调度能力（如派平台）和大厂级售后保障，优先选择无自建运维能力、需发票合规、不接受水货的客户。",insights:[{title:"市场观察：大卡资源竞争",content:"阿里被指信用不佳，常分批交付（10~20台），而京东/百度承诺一次性给足。但阿里云H200在香港是第一批且有机房，需以稳定性和售后为突破口。"},{title:"新机会：广西省政府Token输出",content:"广西省政府要求地市向东南亚输出Token，要求稳定且有售后。政府级潜在PPL，符合团队核心竞争力定位。"}],stats:{members:5,customers:"15+",todos:8,revenue:"~400万",decisions:4},sales:[{name:"张新（欣琦Lorena）",role:"团队负责人",color:"#4f46e5",progress:["AI Lab合同已签署，本周完成保密协议并启动上料","推进两个纯中转站客户，日均消费约2000元","新增两个调入客户：两个中转站 + 一家泛互娱客户","GPU本周将开始上量（非MaaS）"],plan:["闭环AI Lab大颗粒度合同及上量","完成两个中转站客户的MaaS交付","深入沟通东南亚本地Infra总代","参与China Joy及出海流量峰会"]},{name:"张怡薇Ivy",role:"销售成员",color:"#ec4899",progress:["拓新3个客户：1个H200大卡需求 + 2个中转站","H200客户月消费约200万，新增64台设备","另一中转站客户日均消费约2000元，需Kimi K3","调入两个客户"],plan:["推进H200客户的需求对接","与通义侧沟通K3在百炼平台的上架时间及折扣","继续拓展中软站类型客户"]},{name:"孙佳润 Joey",role:"销售成员",color:"#10b981",progress:["调入乐美包装，Salesforce SFDC全预付，年化约200万","中转站客户确认接入K3，配合测试TPM","魔法原子已开通L20N测试，竞对含世纪互联/腾讯","新触达泽路世界CTO，交流双活架构与AWS迁移"],plan:["深化与泽路世界技术方案交流","确认中转站客户K3/3.8max接入进展","明确乐美包装Service Cloud需求规模","摸排具身智能行业及其他特新小组资源"]},{name:"小乖 Jennie",role:"销售成员",color:"#f59e0b",progress:["摸盘40余家客户，覆盖宁波及张江园区","新增1家调入客户：计算机软硬件企业，正在实名认证","另1家上海IPC行业客户，处理企业账号实体认证"],plan:["周四参加上海AI出海大会","周五参与签约事项","考虑参与China Joy相关活动"]},{name:"Nick潘军",role:"销售成员",color:"#3b82f6",progress:["实践客户周日均有小幅上浮，推动API功能完善","Spicy业务寻找更优资源，计划线下拜访","杭州出海中转/Agent服务客户有初步合作意愿","大卡需求客户基本确认，面临京东/百度竞争"],plan:["接触创业型API插件公司，评估中转站潜力","推动实践客户API上量","线下拜访Spicy业务深度合作","跟进杭州出海Agent客户反馈"]}],todos:[{owner:"张怡薇",text:"跟进H200商机需求对接，推进Kimi K3与通义侧沟通并申请百炼折扣，继续拓展中转站类型客户"},{owner:"小乖",text:"参加周四上海AI出海大会和周五签约活动"},{owner:"张新",text:"跟进北大信息技术研究院卡需求，梳理游戏客户潜力名单并分发，准备飞书深诺战略合作议题"},{owner:"孙佳润",text:"确认乐美包装Salesforce新Service Cloud需求量，配合中转站客户K3接入测试，跟进魔法原子L20N测试及GPU+MaaS打包攻坚，交流泽路世界双活/AWS搬迁方案"},{owner:"Nick潘军",text:"推动实践客户API功能完善以上量，线下拜访Spicy业务深度绑定，跟进杭州出海Agent客户反馈"},{owner:"张新",text:"上线agent用于周会过程监控，与何科共同完成agent搭建"},{owner:"小乖",text:"参加China Joy及出海流量峰会"},{owner:"张新",text:"带团队成员对接无影PDIC介绍商机"}],decisions:[{title:"拓新客户筛选标准明确",content:"放弃与纯中转水货市场的价格竞争，聚焦对稳定性与售后服务有强需求的客户群体。优先选择无自建运维能力、需发票合规、不接受水货的客户。"},{title:"客户分类管理口径统一",content:"拓新定义为此前库内无记录或账户消费接近零的客户；已有消费基础的客户回流属于Winback或攻坚范畴，不计入拓新PPL。"},{title:"外部活动参与策略",content:"大型行业峰会全员积极参与；中小型厂商活动需提前明确目标，能通过熟人引荐精准对接关键人时才值得投入。"},{title:"渠道资源整合机制启动",content:"张新主导飞书深诺战略合作，Call High至CEO层级推动互换客户资源。群内共享PDIC商机清单作为拓新线索来源。"}],kanban:{"初步接触":["东南亚本地Infra总代|张新|Infra","泽路世界（头部眼镜出海）|孙佳润|出海","杭州出海Agent服务客户|Nick潘军|Agent","创业型API插件公司|Nick潘军|中转站"],"方案对接":["H200大卡需求客户|张怡薇|GPU 月消费~200万","魔法原子|孙佳润|GPU+MaaS L20N测试中","中转站客户（需K3）|张怡薇|MaaS 日均~2000元","广西省政府Token输出|Nick潘军|政府级PPL"],"测试上量":["中转站客户（K3接入）|孙佳润|MaaS 今日测试TPM","实践客户（API上量）|Nick潘军|API 周日均上浮","Spicy业务客户|Nick潘军|深度合作"],"签约交付":["AI Lab|张新|大颗粒 合同已签","乐美包装|孙佳润|Salesforce 年化~200万","上海IPC行业客户|小乖|IPC 认证中"]}}];
 // ====== 数据结束 ======
+
+// ====== 潜客线索数据（由定时任务每周自动追加，按 batch 批次累积保留） ======
+const LEAD_STATUSES=["未跟进","已分配","初步接触","方案对接","测试上量","签约成交","暂缓"];
+const LEAD_STATUS_COLORS={"未跟进":"#f3f4f6|#6b7280","已分配":"#dbeafe|#1e40af","初步接触":"#fef3c7|#92400e","方案对接":"#fed7aa|#9a3412","测试上量":"#d1fae5|#065f46","签约成交":"#ede9fe|#5b21b6","暂缓":"#f3f4f6|#9ca3af"};
+const LEADS=[
+{batch:"2026-07-29",company:"一目科技",industry:"具身智能/机器人触觉传感",round:"E轮",funding:"2026 Q3 · 超10亿元",aiNeed:"机器人多模态感知与规划决策需大模型推理能力支撑",contact:"未公开",source:"北京日报",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"江行智能",industry:"物理AI/边缘智能",round:"C/D轮",funding:"2026 Q2 · 数亿元",aiNeed:"边缘端AI推理与工业场景大模型部署需MaaS支撑",contact:"www.jiangxingai.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"跃盟科技",industry:"人力资源/AI员工平台",round:"C轮",funding:"2026 Q2 · 数亿元",aiNeed:"AI员工/智能体需大模型API驱动对话、任务规划与决策",contact:"www.deepleaper.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"黑湖科技",industry:"制造业AI/工业SaaS",round:"D轮",funding:"2026 Q2 · 近10亿元",aiNeed:"工业大脑决策、生产调度优化需大模型推理与数据分析",contact:"www.blacklake.cn",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"深度智耀",industry:"AI制药/临床研究",round:"D轮",funding:"2025 Q4 · 近5000万美元",aiNeed:"临床试验文档处理、药物研发知识挖掘需大模型NLP能力",contact:"dipgroup.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"硕橙科技",industry:"工业AI/设备预测性维护",round:"D轮",funding:"2025 Q4 · 过亿元",aiNeed:"工业设备故障诊断与运维知识生成需大模型辅助分析",contact:"www.sucheon.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"悠络客",industry:"AI智慧商业/门店数字化",round:"D轮",funding:"2025 Q4 · 近2亿元",aiNeed:"门店客流分析、消费者行为洞察与智能运营需大模型能力",contact:"www.ulucu.com",source:"科技日报",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"硅基智能",industry:"AIGC/数字人",round:"D轮",funding:"2025 Q3 · 数亿元",aiNeed:"数字人对话交互、多模态内容生成需大模型API支撑",contact:"guiji.ai",source:"36氪",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"百应科技",industry:"AI智能外呼/对话式AI",round:"C轮",funding:"2024 Q4 · 超亿元",aiNeed:"智能外呼与客户运营Agent需大模型驱动自然语言对话",contact:"www.byai.com",source:"腾讯新闻",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"微步在线",industry:"网络安全/威胁情报",round:"E+轮",funding:"2023 · 近10亿元",aiNeed:"威胁情报分析、安全事件研判与自动化响应需大模型推理",contact:"threatbook.cn",source:"云晖资本",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"达观数据",industry:"NLP/智能文档处理",round:"C轮",funding:"2022 Q1 · 5.8亿元",aiNeed:"智能文档审阅、知识图谱构建与办公智能体需大模型API",contact:"www.datagrand.com",source:"亿欧网",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"甄云科技",industry:"采购数字化/SRM",round:"C轮",funding:"2021 Q4 · 6.5亿元",aiNeed:"智能询比价、供应商风险评估与采购决策辅助需大模型能力",contact:"www.going-link.com",source:"21经济网",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"特赞",industry:"内容科技/创意内容平台",round:"D1轮",funding:"2021 Q4 · 千万美元级",aiNeed:"创意内容智能生成、素材理解与品牌内容管理需大模型AIGC",contact:"www.tezign.com",source:"特赞官网",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"e签宝",industry:"电子合同/AI合同管理",round:"E轮",funding:"2021 Q3 · 12亿元",aiNeed:"合同智能起草、条款审查与风险识别需大模型法律NLP能力",contact:"www.esign.cn",source:"e签宝官网",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"擎创科技",industry:"AIOps/智能运维",round:"C轮",funding:"2021 · 6000万美元",aiNeed:"日志智能分析、故障根因定位与运维知识问答需大模型推理",contact:"www.eoitek.com",source:"36氪",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"数美科技",industry:"AI风控/在线业务安全",round:"D轮",funding:"2021 Q2 · 1.35亿美元",aiNeed:"内容审核、欺诈检测与智能风控决策需大模型语义理解",contact:"www.ishumei.com",source:"新浪财经",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"法大大",industry:"电子签名/法务AI",round:"D轮",funding:"2021 Q1 · 9亿元",aiNeed:"合同智能审查、法务AI智能体与合规分析需大模型法律能力",contact:"www.fadada.com",source:"法大大官网",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"深睿医疗",industry:"AI医疗影像",round:"C轮",funding:"2021 Q1 · 数亿元",aiNeed:"医疗影像报告生成、辅助诊断与医学知识问答需大模型能力",contact:"www.deepwise.com",source:"中国移动",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"晓多科技",industry:"电商智能客服",round:"C轮",funding:"2020 · 超2亿元",aiNeed:"电商全平台智能客服、AI-Agent对话与营销推荐需大模型API",contact:"www.xiaoduoai.com",source:"36氪",owner:"",status:"未跟进"},
+{batch:"2026-07-29",company:"沃丰科技(Udesk)",industry:"智能客服/AI营销服务",round:"C轮",funding:"未公开 · 3亿元",aiNeed:"全渠道智能客服、营销自动化与客户洞察需大模型对话能力",contact:"www.udesk.cn",source:"Udesk官网",owner:"",status:"未跟进"}
+];
+// ====== 潜客数据结束 ======
 
 let currentWeek=0;
 const stageColors={"初步接触":["#dbeafe","#1e40af"],"方案对接":["#fef3c7","#92400e"],"测试上量":["#d1fae5","#065f46"],"签约交付":["#ede9fe","#5b21b6"]};
@@ -190,6 +255,7 @@ function switchTab(name){
   document.getElementById('tab-'+name).classList.add('active');
   event.target.classList.add('active');
   if(name==='dashboard')setTimeout(initCharts,100);
+  if(name==='leads')setTimeout(renderLeadCharts,100);
 }
 function renderAll(){
   const m=MEETINGS[currentWeek];
@@ -245,7 +311,77 @@ function initCharts(){
   const tc={};m.todos.forEach(t=>{tc[t.owner]=(tc[t.owner]||0)+1});
   new Chart(document.getElementById('chartTodos'),{type:'bar',data:{labels:Object.keys(tc),datasets:[{label:'待办数量',data:Object.values(tc),backgroundColor:Object.keys(tc).map((_,i)=>colors[i%colors.length]+'33'),borderColor:Object.keys(tc).map((_,i)=>colors[i%colors.length]),borderWidth:2,borderRadius:8}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});
 }
-initWeekSelector();renderAll();
+function initLeads(){
+  document.getElementById('leadStatusFilter').innerHTML='<option value="">全部状态</option>'+LEAD_STATUSES.map(s=>`<option>${s}</option>`).join('');
+  const batches=[...new Set(LEADS.map(l=>l.batch))].sort().reverse();
+  document.getElementById('leadBatchFilter').innerHTML='<option value="">全部批次</option>'+batches.map(b=>`<option>${b}</option>`).join('');
+  renderLeads();
+}
+function leadFilters(){
+  const s=document.getElementById('leadStatusFilter').value;
+  const b=document.getElementById('leadBatchFilter').value;
+  const q=(document.getElementById('leadSearch').value||'').trim().toLowerCase();
+  return LEADS.filter(l=>(!s||l.status===s)&&(!b||l.batch===b)&&(!q||((l.company||'')+(l.industry||'')).toLowerCase().includes(q)));
+}
+function renderLeads(){
+  const list=leadFilters();
+  document.getElementById('leadsBody').innerHTML=list.map(l=>{
+    const idx=LEADS.indexOf(l);
+    const[bg,fg]=(LEAD_STATUS_COLORS[l.status]||"#f3f4f6|#6b7280").split('|');
+    let contact='<span style="color:#9ca3af">未公开</span>';
+    if(l.contact&&l.contact!=='未公开'){const url=l.contact.startsWith('http')?l.contact:'https://'+l.contact;contact=`<a href="${url}" target="_blank">${l.contact.replace(/^https?:\/\//,'')}</a>`;}
+    return `<tr>
+      <td class="company">${l.company}</td>
+      <td>${l.industry}</td>
+      <td><span class="round-tag">${l.round}</span></td>
+      <td style="white-space:nowrap">${l.funding}</td>
+      <td class="need">${l.aiNeed}</td>
+      <td>${contact}</td>
+      <td><span class="lead-owner" contenteditable="true" onblur="LEADS[${idx}].owner=this.textContent.trim()">${l.owner||'待分配'}</span></td>
+      <td><select class="lead-status" style="background:${bg};color:${fg}" onchange="updateLeadStatus(${idx},this.value,this)">${LEAD_STATUSES.map(s=>`<option ${s===l.status?'selected':''}>${s}</option>`).join('')}</select></td>
+      <td><span class="batch-tag">${l.batch}</span></td>
+    </tr>`;}).join('')||'<tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:24px">无匹配线索</td></tr>';
+  renderLeadStats();
+  if(document.getElementById('tab-leads').classList.contains('active'))renderLeadCharts();
+}
+function updateLeadStatus(idx,val,el){
+  LEADS[idx].status=val;
+  const[bg,fg]=(LEAD_STATUS_COLORS[val]||"#f3f4f6|#6b7280").split('|');
+  el.style.background=bg;el.style.color=fg;
+  renderLeadStats();
+  if(document.getElementById('tab-leads').classList.contains('active'))renderLeadCharts();
+}
+function renderLeadStats(){
+  const total=LEADS.length;
+  const un=LEADS.filter(l=>l.status==='未跟进').length;
+  const doing=LEADS.filter(l=>['已分配','初步接触','方案对接','测试上量'].includes(l.status)).length;
+  const won=LEADS.filter(l=>l.status==='签约成交').length;
+  const batches=new Set(LEADS.map(l=>l.batch)).size;
+  document.getElementById('leadStats').innerHTML=`
+    <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">累计线索</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--gray-500)">${un}</div><div class="stat-label">未跟进</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--warning)">${doing}</div><div class="stat-label">跟进中</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--success)">${won}</div><div class="stat-label">已成交</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--info)">${batches}</div><div class="stat-label">采集批次</div></div>`;
+}
+const leadChartPalette={"未跟进":"#9ca3af","已分配":"#3b82f6","初步接触":"#f59e0b","方案对接":"#fb923c","测试上量":"#10b981","签约成交":"#8b5cf6","暂缓":"#d1d5db"};
+let leadCharts={};
+function renderLeadCharts(){
+  const sc={};LEADS.forEach(l=>sc[l.status]=(sc[l.status]||0)+1);
+  const sLabels=Object.keys(sc);
+  if(leadCharts.status)leadCharts.status.destroy();
+  leadCharts.status=new Chart(document.getElementById('chartLeadStatus'),{type:'doughnut',data:{labels:sLabels,datasets:[{data:sLabels.map(s=>sc[s]),backgroundColor:sLabels.map(s=>leadChartPalette[s]||'#9ca3af'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});
+  const ic={};LEADS.forEach(l=>{const k=(l.industry||'其他').split('/')[0];ic[k]=(ic[k]||0)+1});
+  const iLabels=Object.keys(ic).sort((a,b)=>ic[b]-ic[a]);
+  if(leadCharts.industry)leadCharts.industry.destroy();
+  leadCharts.industry=new Chart(document.getElementById('chartLeadIndustry'),{type:'bar',data:{labels:iLabels,datasets:[{label:'线索数',data:iLabels.map(k=>ic[k]),backgroundColor:'rgba(79,70,229,.2)',borderColor:'#4f46e5',borderWidth:2,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});
+}
+function addLead(){
+  const today=new Date().toISOString().slice(0,10);
+  LEADS.unshift({batch:today+" 手动",company:"新公司",industry:"待填写",round:"C轮",funding:"待填写",aiNeed:"待填写",contact:"未公开",source:"手动录入",owner:"",status:"未跟进"});
+  initLeads();
+}
+initWeekSelector();renderAll();initLeads();
 </script>
 </body>
 </html>
