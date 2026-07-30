@@ -100,6 +100,20 @@ table.leads a:hover{text-decoration:underline}
 .lead-status{padding:4px 8px;border:2px dashed rgba(79,70,229,.35);border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s}
 .lead-status:hover{box-shadow:0 0 0 2px rgba(79,70,229,.15)}
 .batch-tag{display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;background:var(--gray-100);color:var(--gray-500);white-space:nowrap}
+.f-bar{margin:0 auto;padding:9px 14px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;font-weight:600;min-width:130px;transition:width .3s}
+.f-bar b{font-size:16px}
+.f-conv{text-align:center;font-size:11px;color:var(--gray-500);padding:3px 0}
+.funnel-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .2s,box-shadow .2s}
+.funnel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.funnel-head{display:flex;align-items:center;gap:10px}
+.funnel-progress{font-size:12px;color:var(--gray-500);background:var(--gray-50);padding:6px 10px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.funnel-body{padding:2px 0}
+.funnel-result{font-size:12px;color:#065f46;background:#d1fae5;padding:6px 10px;border-radius:6px;line-height:1.5}
+.funnel-team-bars{max-width:520px;margin:0 auto}
+.funnel-team-stats{display:flex;justify-content:center;gap:40px;margin-top:18px;flex-wrap:wrap}
+.funnel-team-stats .fs{text-align:center}
+.funnel-team-stats .fs b{display:block;font-size:24px;font-weight:700;color:var(--primary)}
+.funnel-team-stats .fs span{font-size:12px;color:var(--gray-500)}
 footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
 @media(max-width:768px){.kanban{grid-template-columns:1fr}.grid-2,.grid-3,.grid-5{grid-template-columns:1fr}header h1{font-size:20px}.container{padding:16px}}
 </style>
@@ -132,6 +146,7 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
     <button class="tab active" onclick="switchTab('overview')">&#128202; 总览</button>
     <button class="tab" onclick="switchTab('sales')">&#128188; 销售进展</button>
     <button class="tab" onclick="switchTab('kanban')">&#128203; 客户看板</button>
+    <button class="tab" onclick="switchTab('funnel')">&#128300; 漏斗转换</button>
     <button class="tab" onclick="switchTab('todos')">&#9989; 待办事项</button>
     <button class="tab" onclick="switchTab('dashboard')">&#128200; 数据看板</button>
     <button class="tab" onclick="switchTab('decisions')">&#128161; 关键决策</button>
@@ -152,6 +167,18 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
   <div id="tab-kanban" class="tab-content">
     <div class="toolbar"><div class="hint">&#128393; 卡片可编辑 | 按推进阶段分类</div><button class="btn btn-outline" onclick="addKanbanCard()">&#43; 添加客户</button></div>
     <div class="kanban" id="kanbanBoard"></div>
+  </div>
+  <div id="tab-funnel" class="tab-content">
+    <div class="edit-legend" style="margin-bottom:16px"><strong>&#128274; 此页面为自动生成，不可编辑。</strong> 漏斗数据来自"客户看板"各阶段客户统计，转化率 = 下一阶段客户数 ÷ 上一阶段客户数。</div>
+    <div class="card">
+      <h3><span class="icon" style="background:#eef2ff">&#128300;</span> 团队整体漏斗</h3>
+      <div class="funnel-team-bars" id="funnelTeam"></div>
+      <div class="funnel-team-stats" id="funnelTeamStats"></div>
+    </div>
+    <div class="card">
+      <h3><span class="icon" style="background:#d1fae5">&#128101;</span> 各销售漏斗（进度 &#8594; 漏斗 &#8594; 成交）</h3>
+      <div class="grid-3" id="funnelGrid"></div>
+    </div>
   </div>
   <div id="tab-todos" class="tab-content">
     <div class="toolbar"><div class="hint">&#128393; 点击圆圈标记完成 | 文字可编辑</div><button class="btn btn-outline" onclick="addTodo()">&#43; 添加待办</button></div>
@@ -270,7 +297,7 @@ function renderAll(){
     <div class="stat-card"><div class="stat-value">${m.stats.revenue}</div><div class="stat-label">潜在年化收入</div></div>
     <div class="stat-card"><div class="stat-value">${m.stats.decisions}</div><div class="stat-label">关键决策</div></div>`;
   document.getElementById('insightsRow').innerHTML=m.insights.map(i=>`<div class="insight-card"><h4>&#128161; ${i.title}</h4><p>${i.content}</p></div>`).join('');
-  renderSales(m);renderKanban(m);renderTodos(m);renderDecisions(m);
+  renderSales(m);renderKanban(m);renderTodos(m);renderDecisions(m);renderFunnel(m);
 }
 function renderSales(m){
   document.getElementById('salesGrid').innerHTML=m.sales.map(s=>`
@@ -296,6 +323,67 @@ function renderTodos(m){
 }
 function renderDecisions(m){
   document.getElementById('decisionsContent').innerHTML=m.decisions.map((d,i)=>`<div class="decision-item"><h4>${i+1}. ${d.title}</h4><p>${d.content}</p></div>`).join('');
+}
+const funnelStages=["初步接触","方案对接","测试上量","签约交付"];
+const funnelFills=["#93c5fd","#fcd34d","#6ee7b7","#c4b5fd"];
+const funnelText=["#1e40af","#92400e","#065f46","#5b21b6"];
+function ownerToSales(owner,sales){
+  if(!owner)return null;
+  for(const s of sales){
+    const base=s.name.split(/[（(\s]/)[0];
+    if(owner===base||owner.startsWith(base)||s.name.startsWith(owner))return s;
+  }
+  return null;
+}
+function stageCountsByOwner(m){
+  const map={};
+  m.sales.forEach(s=>{map[s.name]={counts:[0,0,0,0],signed:[]};});
+  funnelStages.forEach((stage,si)=>{
+    (m.kanban[stage]||[]).forEach(card=>{
+      const parts=card.split('|');const title=parts[0];const owner=parts[1]||'';
+      const s=ownerToSales(owner,m.sales);
+      if(s&&map[s.name]){map[s.name].counts[si]++;if(si===3)map[s.name].signed.push(title);}
+    });
+  });
+  return map;
+}
+function funnelHTML(counts){
+  const max=Math.max(...counts,1);
+  let html='';
+  counts.forEach((c,i)=>{
+    const w=Math.max(26,Math.round(c/max*100));
+    html+=`<div class="f-bar" style="width:${w}%;background:${funnelFills[i]};color:${funnelText[i]}"><span>${funnelStages[i]}</span><b>${c}</b></div>`;
+    if(i<counts.length-1){
+      const conv=counts[i]>0?Math.round(counts[i+1]/counts[i]*100)+'%':'—';
+      html+=`<div class="f-conv">&#8595; 转化 ${conv}</div>`;
+    }
+  });
+  return html;
+}
+function renderFunnel(m){
+  const byOwner=stageCountsByOwner(m);
+  const teamCounts=[0,0,0,0];
+  funnelStages.forEach((stage,si)=>{(m.kanban[stage]||[]).forEach(()=>{teamCounts[si]++;});});
+  const teamTotal=teamCounts.reduce((a,b)=>a+b,0);
+  const teamSigned=teamCounts[3];
+  const teamConv=teamCounts[0]>0?Math.round(teamSigned/teamCounts[0]*100)+'%':'—';
+  document.getElementById('funnelTeam').innerHTML=funnelHTML(teamCounts);
+  document.getElementById('funnelTeamStats').innerHTML=`
+    <div class="fs"><b>${teamTotal}</b><span>漏斗内客户总数</span></div>
+    <div class="fs"><b style="color:var(--success)">${teamSigned}</b><span>已签约交付</span></div>
+    <div class="fs"><b style="color:var(--warning)">${teamConv}</b><span>接触→签约 整体转化</span></div>`;
+  document.getElementById('funnelGrid').innerHTML=m.sales.map(s=>{
+    const d=byOwner[s.name]||{counts:[0,0,0,0],signed:[]};
+    const total=d.counts.reduce((a,b)=>a+b,0);
+    const signedTxt=d.signed.length?d.signed.join('、'):'暂无成交';
+    const topProgress=(s.progress&&s.progress[0])?s.progress[0]:'—';
+    return `<div class="funnel-card">
+      <div class="funnel-head"><div class="rep-avatar" style="background:${s.color}">${s.name[0]}</div><div><div class="rep-name">${s.name}</div><div class="rep-role">${s.role} · 漏斗内 ${total} 家</div></div></div>
+      <div class="funnel-progress" title="${topProgress}">&#128204; 本周重点：${topProgress}</div>
+      <div class="funnel-body">${funnelHTML(d.counts)}</div>
+      <div class="funnel-result">&#127942; 成交：${signedTxt}</div>
+    </div>`;
+  }).join('');
 }
 function toggleTodo(el){el.classList.toggle('checked');el.nextElementSibling.classList.toggle('done')}
 function addTodo(){const l=document.getElementById('todoList');const li=document.createElement('li');li.className='todo-item';li.innerHTML='<div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">新待办事项...</span><span class="todo-owner" contenteditable="true">负责人</span>';l.appendChild(li)}
