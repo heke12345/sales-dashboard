@@ -7,131 +7,138 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#4f46e5;--primary-light:#eef2ff;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;--gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-300:#d1d5db;--gray-500:#6b7280;--gray-700:#374151;--gray-900:#111827;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.1);--shadow-lg:0 10px 15px -3px rgba(0,0,0,.1)}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--gray-50);color:var(--gray-900);line-height:1.6}
-.container{max-width:1400px;margin:0 auto;padding:24px}
-[contenteditable="true"]{position:relative;outline:none;border-radius:6px;transition:all .2s}
-[contenteditable="true"]:hover{background:rgba(79,70,229,.04);box-shadow:0 0 0 2px rgba(79,70,229,.15)}
-[contenteditable="true"]:focus{background:rgba(79,70,229,.06);box-shadow:0 0 0 2px rgba(79,70,229,.35)}
-[contenteditable="true"]::after{content:"\270F\FE0F";position:absolute;top:2px;right:4px;font-size:11px;opacity:0;transition:opacity .2s;pointer-events:none}
-[contenteditable="true"]:hover::after{opacity:.6}
+:root{--canvas:#F7F6F3;--surface:#FFFFFF;--ink:#111111;--ink-2:#787774;--ink-3:#A8A29E;--line:#EAEAEA;--accent:#4338CA;--chip-blue:#E1F3FE;--chip-rose:#FDEBEC;--chip-green:#EDF3EC;--chip-amber:#FBF3DB;--serif:Georgia,"Songti SC","Noto Serif CJK SC","SimSun",serif;--sans:-apple-system,"SF Pro Text","PingFang SC","Segoe UI","Microsoft YaHei",sans-serif;--mono:"SF Mono","JetBrains Mono",Menlo,Consolas,"Courier New",monospace;--radius:10px;--shadow-hover:0 2px 8px rgba(0,0,0,0.04);--ease:cubic-bezier(0.16,1,0.3,1)}
+body{font-family:var(--sans);background:var(--canvas);color:var(--ink);line-height:1.65;font-size:14px;-webkit-font-smoothing:antialiased}
+.container{max-width:1360px;margin:0 auto;padding:0 32px}
+[contenteditable="true"]{position:relative;outline:none;border-radius:6px;transition:background .2s,box-shadow .2s}
+[contenteditable="true"]:hover{background:rgba(17,17,17,.025);box-shadow:0 0 0 1px var(--line)}
+[contenteditable="true"]:focus{background:var(--surface);box-shadow:0 0 0 2px rgba(67,56,202,.3)}
+[contenteditable="true"]::after{content:"\270E";position:absolute;top:4px;right:6px;font-size:11px;color:var(--ink-3);opacity:0;transition:opacity .2s;pointer-events:none}
+[contenteditable="true"]:hover::after{opacity:1}
 [contenteditable="true"]:focus::after{opacity:1}
-.edit-legend{display:flex;align-items:center;gap:16px;padding:10px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;margin-bottom:20px;font-size:13px;color:#92400e;flex-wrap:wrap}
-.edit-legend .demo{display:inline-block;padding:2px 10px;border:2px dashed rgba(79,70,229,.4);border-radius:6px;background:rgba(79,70,229,.04);font-size:12px}
-.edit-legend .demo-static{display:inline-block;padding:2px 10px;border:2px solid var(--gray-200);border-radius:6px;background:var(--gray-100);font-size:12px}
-header{background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%);color:#fff;padding:28px 0 20px;margin-bottom:24px;border-radius:0 0 24px 24px}
-header .container{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px}
-header h1{font-size:26px;font-weight:700}
-.header-meta{display:flex;gap:16px;font-size:13px;opacity:.9;margin-top:8px;flex-wrap:wrap}
+.edit-legend{display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:24px;font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--ink-2);flex-wrap:wrap}
+.edit-legend strong{color:var(--ink);font-weight:600}
+.edit-legend .demo{display:inline-block;padding:2px 10px;border:1px dashed var(--ink-3);border-radius:6px;font-size:11px}
+.edit-legend .demo-static{display:inline-block;padding:2px 10px;border:1px solid var(--line);border-radius:6px;background:var(--canvas);font-size:11px}
+header{background:var(--canvas);border-bottom:1px solid var(--line);padding:52px 0 36px}
+header .container{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px}
+.header-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--ink-2);margin-bottom:12px}
+header h1{font-family:var(--serif);font-size:38px;font-weight:400;letter-spacing:-0.025em;line-height:1.05}
+.header-meta{display:flex;gap:24px;font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:14px;flex-wrap:wrap}
 .header-meta span{display:flex;align-items:center;gap:5px}
 .header-right{text-align:right}
-.week-selector select{padding:6px 12px;border-radius:8px;border:none;font-size:13px;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;margin-top:6px}
-.week-selector select option{color:#333;background:#fff}
-.tabs{display:flex;gap:4px;background:#fff;padding:6px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow-x:auto}
-.tab{padding:10px 18px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--gray-500);transition:all .2s;white-space:nowrap;border:none;background:none}
-.tab:hover{color:var(--gray-700);background:var(--gray-100)}
-.tab.active{background:var(--primary);color:#fff}
+.week-selector select{padding:8px 14px;border-radius:8px;border:1px solid var(--line);font-family:var(--mono);font-size:12px;background:var(--surface);color:var(--ink);cursor:pointer;margin-top:8px}
+.tabs{position:sticky;top:12px;z-index:100;display:flex;gap:2px;background:rgba(247,246,243,.86);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:4px;border:1px solid var(--line);border-radius:10px;margin:28px 0 32px;overflow-x:auto}
+.tab{padding:9px 16px;border-radius:7px;cursor:pointer;font-size:13px;font-weight:500;color:var(--ink-2);transition:color .2s,background .2s;white-space:nowrap;border:none;background:none;font-family:var(--sans)}
+.tab:hover{color:var(--ink)}
+.tab.active{background:var(--ink);color:var(--canvas)}
 .tab-content{display:none}.tab-content.active{display:block}
-.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
-.card h3{font-size:16px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.card h3 .icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
-.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px}
-.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:28px;margin-bottom:24px}
+.card h3{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:-0.01em;margin-bottom:20px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.card h3 .h3-note{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.05em}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:24px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
 .grid-5{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-.rep-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:transform .2s,box-shadow .2s}
-.rep-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
-.rep-header{padding:14px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--gray-100)}
-.rep-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:15px}
-.rep-name{font-weight:600;font-size:15px}.rep-role{font-size:12px;color:var(--gray-500)}
-.rep-body{padding:12px 16px}
-.rep-body h4{font-size:12px;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px}
+.rep-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.rep-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.rep-header{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+.rep-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;color:#fff;font-size:14px;flex-shrink:0}
+.rep-name{font-weight:600;font-size:14px}.rep-role{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:1px}
+.rep-body{padding:14px 16px}
+.rep-body h4{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.08em;margin:12px 0 7px}
 .rep-body h4:first-child{margin-top:0}
 .rep-body ul{list-style:none;padding:0}
-.rep-body li{font-size:13px;padding:3px 0;padding-left:14px;position:relative;color:var(--gray-700)}
-.rep-body li::before{content:"";position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
-.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;min-height:400px}
-.kanban-col{background:var(--gray-100);border-radius:var(--radius);padding:12px}
-.kanban-col-header{font-size:13px;font-weight:600;padding:8px 12px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-.kanban-col-header .count{background:rgba(0,0,0,.1);padding:1px 8px;border-radius:10px;font-size:11px}
-.kanban-card{background:#fff;border-radius:8px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow);font-size:13px;transition:transform .15s}
-.kanban-card:hover{transform:scale(1.02)}
+.rep-body li{font-size:13px;padding:3px 0;padding-left:14px;position:relative;color:var(--ink-2)}
+.rep-body li::before{content:"";position:absolute;left:0;top:10px;width:4px;height:4px;border-radius:50%;background:var(--ink-3)}
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;min-height:400px}
+.kanban-col{background:var(--canvas);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.kanban-col-header{font-size:13px;font-weight:600;padding:8px 12px;border-radius:7px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.kanban-col-header .count{font-family:var(--mono);font-size:10px;background:rgba(17,17,17,.06);padding:2px 8px;border-radius:6px}
+.kanban-card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:13px;margin-bottom:8px;font-size:13px;transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
+.kanban-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-hover)}
 .kanban-card .title{font-weight:600;margin-bottom:4px}
-.kanban-card .owner{font-size:11px;color:var(--gray-500)}
-.kanban-card .value{font-size:12px;color:var(--primary);font-weight:500;margin-top:3px}
-.kanban-card .tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;margin-top:3px}
-.todo-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:8px;background:var(--gray-50);transition:background .2s}
-.todo-item:hover{background:var(--primary-light)}
-.todo-checkbox{width:20px;height:20px;border-radius:50%;border:2px solid var(--gray-300);cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .2s;display:flex;align-items:center;justify-content:center}
-.todo-checkbox.checked{background:var(--success);border-color:var(--success)}
-.todo-checkbox.checked::after{content:"\2713";color:#fff;font-size:12px}
-.todo-text{font-size:14px;flex:1}.todo-text.done{text-decoration:line-through;color:var(--gray-500)}
-.todo-owner{font-size:12px;padding:2px 8px;border-radius:12px;background:var(--primary-light);color:var(--primary);font-weight:500;white-space:nowrap}
+.kanban-card .owner{font-family:var(--mono);font-size:11px;color:var(--ink-2)}
+.kanban-card .value{font-family:var(--serif);font-size:14px;color:var(--accent);margin-top:4px;letter-spacing:-0.01em}
+.kanban-card .tag{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;margin-top:4px}
+.todo-item{display:flex;align-items:flex-start;gap:12px;padding:13px 16px;border-radius:8px;margin-bottom:8px;background:var(--canvas);border:1px solid var(--line);transition:box-shadow .2s var(--ease)}
+.todo-item:hover{box-shadow:var(--shadow-hover)}
+.todo-checkbox{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--ink-3);cursor:pointer;flex-shrink:0;margin-top:2px;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.todo-checkbox.checked{background:var(--ink);border-color:var(--ink)}
+.todo-checkbox.checked::after{content:"\2713";color:var(--canvas);font-size:11px}
+.todo-text{font-size:14px;flex:1}.todo-text.done{text-decoration:line-through;color:var(--ink-3)}
+.todo-owner{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:6px;background:var(--chip-blue);color:#1E40AF;font-weight:600;white-space:nowrap}
 .chart-container{position:relative;height:280px;width:100%}
 .chart-container-sm{position:relative;height:240px;width:100%}
-.stat-card{text-align:center;padding:18px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow)}
-.stat-value{font-size:28px;font-weight:700;color:var(--primary)}
-.stat-label{font-size:12px;color:var(--gray-500);margin-top:4px}
-.decision-item{padding:14px;border-left:4px solid var(--primary);background:var(--primary-light);border-radius:0 8px 8px 0;margin-bottom:12px}
-.decision-item h4{font-size:14px;font-weight:600;margin-bottom:4px}
-.decision-item p{font-size:13px;color:var(--gray-700)}
-.insight-card{padding:14px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:var(--radius);margin-bottom:12px}
-.insight-card h4{font-size:14px;font-weight:600;color:#92400e;margin-bottom:4px}
-.insight-card p{font-size:13px;color:#78350f}
-.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px}
-.toolbar .hint{font-size:12px;color:var(--gray-500)}
-.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s}
-.btn-outline{background:#fff;border:1px solid var(--gray-200);color:var(--gray-700)}
-.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
-.leads-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.leads-toolbar select,.leads-toolbar input{padding:7px 12px;border-radius:8px;border:1px solid var(--gray-200);font-size:13px;background:#fff;color:var(--gray-700)}
+.stat-card{text-align:center;padding:22px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.stat-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-hover)}
+.stat-value{font-family:var(--serif);font-size:30px;letter-spacing:-0.025em;line-height:1.05;color:var(--ink)}
+.stat-label{font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:7px;letter-spacing:.05em}
+.decision-item{padding:16px 18px;border-left:2px solid var(--ink);background:var(--canvas);border-radius:0 8px 8px 0;margin-bottom:12px}
+.decision-item h4{font-size:14px;font-weight:600;margin-bottom:5px}
+.decision-item p{font-size:13px;color:var(--ink-2)}
+.insight-card{padding:18px;background:var(--chip-amber);border-radius:var(--radius);margin-bottom:12px}
+.insight-card h4{font-family:var(--serif);font-size:15px;font-weight:600;color:#92400E;margin-bottom:6px}
+.insight-card p{font-size:13px;color:#78350F}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+.toolbar .hint{font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:.03em}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:500;transition:all .2s}
+.btn-outline{background:var(--surface);border:1px solid var(--line);color:var(--ink-2);font-family:var(--mono)}
+.btn-outline:hover{border-color:var(--ink);color:var(--ink)}
+.leads-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.leads-toolbar select,.leads-toolbar input{padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-size:12px;font-family:var(--mono);background:var(--surface);color:var(--ink)}
 .leads-toolbar input{flex:1;min-width:160px}
-.leads-table-wrap{overflow-x:auto;border-radius:var(--radius)}
-table.leads{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
-table.leads th{background:var(--gray-100);color:var(--gray-700);font-weight:600;text-align:left;padding:10px 12px;white-space:nowrap;border-bottom:2px solid var(--gray-200)}
-table.leads td{padding:10px 12px;border-bottom:1px solid var(--gray-100);vertical-align:top;color:var(--gray-700)}
-table.leads tr:hover td{background:var(--gray-50)}
-table.leads .company{font-weight:600;color:var(--gray-900);white-space:nowrap}
-table.leads .round-tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#ede9fe;color:#5b21b6;white-space:nowrap}
-table.leads .need{max-width:280px;color:var(--gray-500);font-size:12px;line-height:1.5}
-table.leads a{color:var(--primary);text-decoration:none}
+.leads-toolbar input:focus,.leads-toolbar select:focus{outline:none;border-color:var(--ink-3)}
+.leads-table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--line)}
+table.leads{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface)}
+table.leads th{background:var(--canvas);color:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.06em;font-weight:500;text-align:left;padding:11px 13px;white-space:nowrap;border-bottom:1px solid var(--line)}
+table.leads td{padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+table.leads tr:last-child td{border-bottom:none}
+table.leads tr:hover td{background:var(--canvas)}
+table.leads .company{font-weight:600;color:var(--ink);white-space:nowrap}
+table.leads .round-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:var(--chip-rose);color:#9F1239;white-space:nowrap}
+table.leads .need{max-width:280px;color:var(--ink-2);font-size:12px;line-height:1.55}
+table.leads a{color:var(--accent);text-decoration:none}
 table.leads a:hover{text-decoration:underline}
-.lead-owner{display:inline-block;min-width:64px;padding:3px 8px;border:2px dashed rgba(79,70,229,.35);border-radius:6px;background:rgba(79,70,229,.03);font-size:12px;transition:all .2s}
-.lead-owner:hover{background:rgba(79,70,229,.07);box-shadow:0 0 0 2px rgba(79,70,229,.15)}
-.lead-status{padding:4px 8px;border:2px dashed rgba(79,70,229,.35);border-radius:6px;font-size:12px;cursor:pointer;font-weight:600;transition:all .2s}
-.lead-status:hover{box-shadow:0 0 0 2px rgba(79,70,229,.15)}
-.batch-tag{display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;background:var(--gray-100);color:var(--gray-500);white-space:nowrap}
-.f-bar{margin:0 auto;padding:10px 16px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#fff;min-width:140px;transition:width .3s;box-shadow:0 2px 8px rgba(0,0,0,.12)}
-.f-bar b{font-size:17px;font-weight:800}
-.f-conv{text-align:center;font-size:11px;color:var(--gray-500);padding:4px 0;font-weight:600}
-.f-conv b{font-weight:800;color:var(--gray-700)}
-.f-metrics{display:flex;align-items:baseline;gap:7px}
-.f-metrics em{font-style:normal;font-size:11px;font-weight:700;opacity:.95}
-.funnel-hero .f-metrics em{font-size:13px}
-.funnel-hero{background:linear-gradient(135deg,#312e81 0%,#4f46e5 55%,#7c3aed 100%);border-radius:20px;padding:32px 28px 28px;color:#fff;box-shadow:0 20px 40px -12px rgba(79,70,229,.45);margin-bottom:20px}
-.funnel-hero-title{font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.funnel-hero-title span{font-size:12px;font-weight:400;opacity:.75}
-.funnel-hero-stats{display:flex;gap:48px;margin:22px 0 26px;flex-wrap:wrap}
-.funnel-hero-stats .fs b{display:block;font-size:36px;font-weight:800;line-height:1.1}
-.funnel-hero-stats .fs span{font-size:12px;opacity:.8}
-.funnel-hero .f-bar{padding:14px 20px;font-size:15px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.lead-owner{display:inline-block;min-width:64px;padding:3px 8px;border:1px dashed var(--ink-3);border-radius:6px;font-size:12px;transition:all .2s}
+.lead-owner:hover{box-shadow:0 0 0 1px var(--line)}
+.lead-status{padding:4px 8px;border:1px dashed var(--ink-3);border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;transition:all .2s}
+.batch-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-family:var(--mono);font-size:10px;background:var(--canvas);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap}
+.f-bar{margin:0 auto;padding:11px 18px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#fff;min-width:140px;transition:width .4s var(--ease)}
+.f-bar b{font-family:var(--serif);font-size:18px;font-weight:400}
+.f-conv{text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-2);padding:5px 0}
+.f-conv b{font-weight:700;color:var(--ink)}
+.f-metrics{display:flex;align-items:baseline;gap:8px}
+.f-metrics em{font-style:normal;font-family:var(--mono);font-size:11px;font-weight:600;opacity:.92}
+.funnel-hero{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:48px 44px 40px;margin-bottom:24px}
+.funnel-hero-title{font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.025em;line-height:1.05;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.funnel-hero-title span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink-2)}
+.funnel-hero-stats{display:flex;margin:34px 0 38px;flex-wrap:wrap;row-gap:24px}
+.funnel-hero-stats .fs{padding:0 44px;border-left:1px solid var(--line)}
+.funnel-hero-stats .fs:first-child{padding-left:0;border-left:none}
+.funnel-hero-stats .fs b{display:block;font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.03em;line-height:1.05;color:var(--ink)}
+.funnel-hero-stats .fs span{font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:.05em}
+.funnel-hero .f-bar{padding:14px 22px;font-size:14px}
 .funnel-hero .f-bar b{font-size:24px}
-.funnel-hero .f-conv{color:rgba(255,255,255,.75)}
-.funnel-hero .f-conv b{color:#fff}
+.funnel-hero .f-metrics em{font-size:12px}
 .funnel-team-bars{max-width:640px;margin:0 auto}
-.funnel-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform .2s,box-shadow .2s}
-.funnel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.funnel-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:11px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.funnel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
 .funnel-head{display:flex;align-items:center;gap:10px}
-.funnel-progress{font-size:12px;color:var(--gray-500);background:var(--gray-50);padding:6px 10px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.funnel-progress{font-size:12px;color:var(--ink-2);background:var(--canvas);border:1px solid var(--line);padding:7px 12px;border-radius:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .funnel-body{padding:2px 0}
-.funnel-result{font-size:12px;color:#065f46;background:#d1fae5;padding:6px 10px;border-radius:6px;line-height:1.5}
-footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
-@media(max-width:768px){.kanban{grid-template-columns:1fr}.grid-2,.grid-3,.grid-5{grid-template-columns:1fr}header h1{font-size:20px}.container{padding:16px}}
+.funnel-result{font-size:12px;color:#047857;background:var(--chip-green);padding:7px 12px;border-radius:7px;line-height:1.6}
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .6s var(--ease),transform .6s var(--ease);transition-delay:calc(var(--i,0)*80ms)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+footer{border-top:1px solid var(--line);margin-top:56px;padding:36px 32px;text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--ink-2)}
+@media(max-width:768px){.kanban{grid-template-columns:1fr}.grid-2,.grid-3,.grid-5{grid-template-columns:1fr}header h1{font-size:26px}.container{padding:0 16px}.funnel-hero{padding:28px 20px}.funnel-hero-stats .fs{padding:0 20px}.funnel-hero-stats .fs b{font-size:32px}}
 </style>
 </head>
 <body>
 <header>
   <div class="container">
     <div>
+      <div class="header-eyebrow">ALIBABA CLOUD &middot; MaaS + GPU &middot; 拓新业务</div>
       <h1>拓新业务周例会</h1>
       <div class="header-meta">
         <span id="meetingDate"></span>
@@ -140,79 +147,79 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
       </div>
     </div>
     <div class="header-right">
-      <div style="font-size:13px;opacity:.8">切换周次</div>
+      <div class="header-eyebrow" style="margin-bottom:0">切换周次</div>
       <div class="week-selector"><select id="weekSelect" onchange="switchWeek(this.value)"></select></div>
     </div>
   </div>
 </header>
 <div class="container">
   <div class="edit-legend">
-    <strong>&#128393; 编辑说明：</strong>
+    <strong>编辑说明</strong>
     <span class="demo">虚线框 = 可点击编辑</span>
-    <span class="demo-static">实线框/图表 = 不可编辑</span>
-    <span>鼠标悬停出现 &#9998; 图标的区域均可直接修改</span>
+    <span class="demo-static">实线框 / 图表 = 不可编辑</span>
+    <span>鼠标悬停出现 &#10000; 标记的区域均可直接修改</span>
   </div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('funnel')">&#128300; 漏斗转换</button>
-    <button class="tab" onclick="switchTab('overview')">&#128202; 总览</button>
-    <button class="tab" onclick="switchTab('sales')">&#128188; 销售进展</button>
-    <button class="tab" onclick="switchTab('kanban')">&#128203; 客户看板</button>
-    <button class="tab" onclick="switchTab('todos')">&#9989; 待办事项</button>
-    <button class="tab" onclick="switchTab('dashboard')">&#128200; 数据看板</button>
-    <button class="tab" onclick="switchTab('decisions')">&#128161; 关键决策</button>
-    <button class="tab" onclick="switchTab('leads')">&#127919; 潜客线索</button>
+    <button class="tab active" onclick="switchTab('funnel')">漏斗转换</button>
+    <button class="tab" onclick="switchTab('overview')">总览</button>
+    <button class="tab" onclick="switchTab('sales')">销售进展</button>
+    <button class="tab" onclick="switchTab('kanban')">客户看板</button>
+    <button class="tab" onclick="switchTab('todos')">待办事项</button>
+    <button class="tab" onclick="switchTab('dashboard')">数据看板</button>
+    <button class="tab" onclick="switchTab('decisions')">关键决策</button>
+    <button class="tab" onclick="switchTab('leads')">潜客线索</button>
   </div>
   <div id="tab-overview" class="tab-content">
-    <div class="grid-5" style="margin-bottom:20px" id="statsRow"></div>
+    <div class="grid-5" style="margin-bottom:24px" id="statsRow"></div>
     <div class="card">
-      <h3><span class="icon" style="background:#eef2ff">&#128221;</span> 会议摘要 <span style="font-size:11px;color:var(--gray-500);font-weight:400">（可编辑）</span></h3>
-      <div contenteditable="true" id="summaryContent" style="font-size:14px;color:var(--gray-700);padding:12px;border:2px dashed rgba(79,70,229,.25);border-radius:8px"></div>
+      <h3>会议摘要 <span class="h3-note">可编辑</span></h3>
+      <div contenteditable="true" id="summaryContent" style="font-size:14px;color:var(--ink-2);padding:14px;border:1px dashed var(--ink-3);border-radius:8px"></div>
     </div>
     <div class="grid-2" id="insightsRow"></div>
   </div>
   <div id="tab-sales" class="tab-content">
-    <div class="toolbar"><div class="hint">&#128393; 带虚线边框的区域可直接点击编辑</div><button class="btn btn-outline" onclick="window.print()">&#128424; 导出打印</button></div>
+    <div class="toolbar"><div class="hint">带虚线边框的区域可直接点击编辑</div><button class="btn btn-outline" onclick="window.print()">导出打印</button></div>
     <div class="grid-3" id="salesGrid"></div>
   </div>
   <div id="tab-kanban" class="tab-content">
-    <div class="toolbar"><div class="hint">&#128393; 卡片可编辑 | 按推进阶段分类</div><button class="btn btn-outline" onclick="addKanbanCard()">&#43; 添加客户</button></div>
+    <div class="toolbar"><div class="hint">卡片可编辑 &middot; 按推进阶段分类</div><button class="btn btn-outline" onclick="addKanbanCard()">&#43; 添加客户</button></div>
     <div class="kanban" id="kanbanBoard"></div>
   </div>
   <div id="tab-funnel" class="tab-content active">
     <div class="funnel-hero">
-      <div class="funnel-hero-title">&#128300; 团队拓新漏斗 <span>初步接触 &#8594; 方案对接 &#8594; 测试上量 &#8594; 签约交付</span></div>
+      <div class="funnel-hero-title">团队拓新漏斗 <span>初步接触 &#8594; 方案对接 &#8594; 测试上量 &#8594; 签约交付</span></div>
       <div class="funnel-hero-stats" id="funnelTeamStats"></div>
       <div class="funnel-team-bars" id="funnelTeam"></div>
     </div>
     <div class="card">
-      <h3><span class="icon" style="background:#d1fae5">&#128101;</span> 各销售漏斗 · 本周进度 &#8594; 客户漏斗 &#8594; 成交结果</h3>
+      <h3>各销售漏斗 <span class="h3-note">本周进度 &#8594; 客户漏斗 &#8594; 成交结果</span></h3>
       <div class="grid-3" id="funnelGrid"></div>
     </div>
   </div>
   <div id="tab-todos" class="tab-content">
-    <div class="toolbar"><div class="hint">&#128393; 点击圆圈标记完成 | 文字可编辑</div><button class="btn btn-outline" onclick="addTodo()">&#43; 添加待办</button></div>
-    <div class="card"><h3><span class="icon" style="background:#d1fae5">&#9989;</span> 本周行动项</h3><ul style="list-style:none" id="todoList"></ul></div>
+    <div class="toolbar"><div class="hint">点击圆圈标记完成 &middot; 文字可编辑</div><button class="btn btn-outline" onclick="addTodo()">&#43; 添加待办</button></div>
+    <div class="card"><h3>本周行动项</h3><ul style="list-style:none" id="todoList"></ul></div>
   </div>
   <div id="tab-dashboard" class="tab-content">
-    <div class="edit-legend" style="margin-bottom:16px"><strong>&#128274; 此页面为自动生成图表，不可编辑。</strong> 数据来源于会议内容自动统计。</div>
+    <div class="edit-legend" style="margin-bottom:20px"><strong>此页面为自动生成图表，不可编辑。</strong> 数据来源于会议内容自动统计。</div>
     <div class="grid-2">
-      <div class="card"><h3><span class="icon" style="background:#ede9fe">&#128200;</span> 各销售客户数量</h3><div class="chart-container"><canvas id="chartCustomers"></canvas></div></div>
-      <div class="card"><h3><span class="icon" style="background:#d1fae5">&#128176;</span> 潜在年化收入（万元）</h3><div class="chart-container"><canvas id="chartRevenue"></canvas></div></div>
+      <div class="card"><h3>各销售客户数量</h3><div class="chart-container"><canvas id="chartCustomers"></canvas></div></div>
+      <div class="card"><h3>潜在年化收入（万元）</h3><div class="chart-container"><canvas id="chartRevenue"></canvas></div></div>
     </div>
     <div class="grid-2">
-      <div class="card"><h3><span class="icon" style="background:#fef3c7">&#128202;</span> 客户阶段分布</h3><div class="chart-container-sm"><canvas id="chartStage"></canvas></div></div>
-      <div class="card"><h3><span class="icon" style="background:#dbeafe">&#127919;</span> 业务类型占比</h3><div class="chart-container-sm"><canvas id="chartType"></canvas></div></div>
+      <div class="card"><h3>客户阶段分布</h3><div class="chart-container-sm"><canvas id="chartStage"></canvas></div></div>
+      <div class="card"><h3>业务类型占比</h3><div class="chart-container-sm"><canvas id="chartType"></canvas></div></div>
     </div>
-    <div class="card"><h3><span class="icon" style="background:#fce7f3">&#128205;</span> 待办分配</h3><div class="chart-container-sm"><canvas id="chartTodos"></canvas></div></div>
+    <div class="card"><h3>待办分配</h3><div class="chart-container-sm"><canvas id="chartTodos"></canvas></div></div>
   </div>
   <div id="tab-decisions" class="tab-content">
     <div class="card">
-      <h3><span class="icon" style="background:#fef3c7">&#128161;</span> 关键决策与共识 <span style="font-size:11px;color:var(--gray-500);font-weight:400">（可编辑）</span></h3>
-      <div contenteditable="true" id="decisionsContent" style="padding:12px;border:2px dashed rgba(79,70,229,.25);border-radius:8px"></div>
+      <h3>关键决策与共识 <span class="h3-note">可编辑</span></h3>
+      <div contenteditable="true" id="decisionsContent" style="padding:14px;border:1px dashed var(--ink-3);border-radius:8px"></div>
     </div>
     <div class="card">
-      <h3><span class="icon" style="background:#d1fae5">&#128220;</span> 项目对接规则 <span style="font-size:11px;color:var(--gray-500);font-weight:400">（可编辑）</span></h3>
-      <div contenteditable="true" style="font-size:14px;color:var(--gray-700);padding:12px;border:2px dashed rgba(79,70,229,.25);border-radius:8px">
+      <h3>项目对接规则 <span class="h3-note">可编辑</span></h3>
+      <div contenteditable="true" style="font-size:14px;color:var(--ink-2);padding:14px;border:1px dashed var(--ink-3);border-radius:8px">
         <p style="margin-bottom:8px"><strong>何科（横向支持）加入规则：</strong></p>
         <p style="margin-bottom:6px">&#8226; 年化低于50万的项目 &#8594; 商务团队自主闭环，不需联系何科</p>
         <p>&#8226; MaaS日均收入小于1000元的项目 &#8594; 前期商务跟进，关键卡点后再引入何科支持</p>
@@ -220,28 +227,28 @@ footer{text-align:center;padding:32px;color:var(--gray-500);font-size:12px}
     </div>
   </div>
   <div id="tab-leads" class="tab-content">
-    <div class="edit-legend" style="margin-bottom:16px"><strong>&#128393; 编辑说明：</strong><span class="demo">跟进人 / 状态 = 可编辑</span><span class="demo-static">公司 / 融资信息 = 自动采集不可改</span><span>每周自动搜集约20家C轮潜客，按批次累积保留</span></div>
-    <div class="grid-5" style="margin-bottom:20px" id="leadStats"></div>
+    <div class="edit-legend" style="margin-bottom:20px"><strong>编辑说明</strong><span class="demo">跟进人 / 状态 = 可编辑</span><span class="demo-static">公司 / 融资信息 = 自动采集不可改</span><span>每周自动搜集约20家C轮潜客，按批次累积保留</span></div>
+    <div class="grid-5" style="margin-bottom:24px" id="leadStats"></div>
     <div class="card">
       <div class="leads-toolbar">
         <select id="leadStatusFilter" onchange="renderLeads()"></select>
         <select id="leadBatchFilter" onchange="renderLeads()"></select>
-        <input id="leadSearch" placeholder="&#128269; 搜索公司名 / 行业..." oninput="renderLeads()">
+        <input id="leadSearch" placeholder="搜索公司名 / 行业..." oninput="renderLeads()">
         <button class="btn btn-outline" onclick="addLead()">&#43; 手动添加</button>
       </div>
       <div class="leads-table-wrap"><table class="leads"><thead><tr>
-        <th>公司</th><th>行业</th><th>轮次</th><th>融资</th><th>AI MaaS 需求点</th><th>联系方式</th><th>跟进人 &#9998;</th><th>状态 &#9998;</th><th>批次</th>
+        <th>公司</th><th>行业</th><th>轮次</th><th>融资</th><th>AI MaaS 需求点</th><th>联系方式</th><th>跟进人</th><th>状态</th><th>批次</th>
       </tr></thead><tbody id="leadsBody"></tbody></table></div>
     </div>
     <div class="grid-2">
-      <div class="card"><h3><span class="icon" style="background:#ede9fe">&#128202;</span> 线索状态分布</h3><div class="chart-container-sm"><canvas id="chartLeadStatus"></canvas></div></div>
-      <div class="card"><h3><span class="icon" style="background:#dbeafe">&#127981;</span> 线索行业分布</h3><div class="chart-container-sm"><canvas id="chartLeadIndustry"></canvas></div></div>
+      <div class="card"><h3>线索状态分布</h3><div class="chart-container-sm"><canvas id="chartLeadStatus"></canvas></div></div>
+      <div class="card"><h3>线索行业分布</h3><div class="chart-container-sm"><canvas id="chartLeadIndustry"></canvas></div></div>
     </div>
   </div>
 </div>
 <footer>
-  <p>数据来源：钉钉AI听记 &middot; 自动生成于 2026-07-28 &middot; 每周日 18:00 自动更新</p>
-  <p style="margin-top:4px">&#128393; 虚线框区域可直接点击编辑 &middot; 图表/统计区域为自动生成不可编辑</p>
+  <p>数据来源：钉钉AI听记 &middot; 每日 9:00 / 18:00 自动检查更新</p>
+  <p style="margin-top:6px">虚线框区域可直接点击编辑 &middot; 图表与统计区域为自动生成不可编辑</p>
 </footer>
 <script>
 // ====== 会议数据（由定时任务每周自动追加更新） ======
@@ -295,9 +302,9 @@ function switchTab(name){
 }
 function renderAll(){
   const m=MEETINGS[currentWeek];
-  document.getElementById('meetingDate').innerHTML='&#128197; '+m.date;
-  document.getElementById('meetingTime').innerHTML='&#9201; '+m.time+' 开始 \u00b7 约'+m.duration;
-  document.getElementById('meetingPeople').innerHTML='&#128101; '+m.participants+'人参会';
+  document.getElementById('meetingDate').textContent=m.date;
+  document.getElementById('meetingTime').textContent=m.time+' 开始 \u00b7 约'+m.duration;
+  document.getElementById('meetingPeople').textContent=m.participants+'人参会';
   document.getElementById('summaryContent').innerHTML=m.summary;
   document.getElementById('statsRow').innerHTML=`
     <div class="stat-card"><div class="stat-value">${m.stats.members}</div><div class="stat-label">销售成员</div></div>
@@ -305,15 +312,15 @@ function renderAll(){
     <div class="stat-card"><div class="stat-value">${m.stats.todos}</div><div class="stat-label">本周待办</div></div>
     <div class="stat-card"><div class="stat-value">${m.stats.revenue}</div><div class="stat-label">潜在年化收入</div></div>
     <div class="stat-card"><div class="stat-value">${m.stats.decisions}</div><div class="stat-label">关键决策</div></div>`;
-  document.getElementById('insightsRow').innerHTML=m.insights.map(i=>`<div class="insight-card"><h4>&#128161; ${i.title}</h4><p>${i.content}</p></div>`).join('');
-  renderSales(m);renderKanban(m);renderTodos(m);renderDecisions(m);renderFunnel(m);
+  document.getElementById('insightsRow').innerHTML=m.insights.map(i=>`<div class="insight-card"><h4>${i.title}</h4><p>${i.content}</p></div>`).join('');
+  renderSales(m);renderKanban(m);renderTodos(m);renderDecisions(m);renderFunnel(m);revealInit();
 }
 function renderSales(m){
   document.getElementById('salesGrid').innerHTML=m.sales.map(s=>`
     <div class="rep-card"><div class="rep-header">
       <div class="rep-avatar" style="background:${s.color}">${s.name[0]}</div>
       <div><div class="rep-name">${s.name}</div><div class="rep-role">${s.role}</div></div>
-    </div><div class="rep-body" contenteditable="true" style="border:2px dashed rgba(79,70,229,.15);margin:8px;border-radius:8px;padding:12px">
+    </div><div class="rep-body" contenteditable="true" style="border:1px dashed var(--ink-3);margin:10px;border-radius:8px;padding:12px">
       <h4>本周重点进展</h4><ul>${s.progress.map(p=>'<li>'+p+'</li>').join('')}</ul>
       <h4>下周计划</h4><ul>${s.plan.map(p=>'<li>'+p+'</li>').join('')}</ul>
     </div></div>`).join('');
@@ -324,7 +331,7 @@ function renderKanban(m){
     const stageVal=cards.reduce((a,c)=>a+(parseFloat(c.split('|')[3])||0),0);
     return `<div class="kanban-col"><div class="kanban-col-header" style="background:${bg};color:${fg}">${stage} <span class="count">${cards.length}家 · &#165;${stageVal}万</span></div>
     ${cards.map(c=>{const[title,owner,tag,val]=c.split('|');const[tbg,tfg]=(tagColors[tag]||"#f3f4f6|#374151").split('|');
-      return `<div class="kanban-card" contenteditable="true" style="border:1px dashed rgba(79,70,229,.2)"><div class="title">${title}</div><div class="owner">&#128100; ${owner}</div>${val?`<div class="value">&#165;${val}万/年</div>`:''}<div class="tag" style="background:${tbg};color:${tfg}">${tag}</div></div>`;}).join('')}</div>`;}).join('');
+      return `<div class="kanban-card" contenteditable="true" style="border:1px dashed var(--ink-3)"><div class="title">${title}</div><div class="owner">${owner}</div>${val?`<div class="value">&#165;${val}万/年</div>`:''}<div class="tag" style="background:${tbg};color:${tfg}">${tag}</div></div>`;}).join('')}</div>`;}).join('');
 }
 function renderTodos(m){
   document.getElementById('todoList').innerHTML=m.todos.map(t=>`
@@ -335,7 +342,7 @@ function renderDecisions(m){
   document.getElementById('decisionsContent').innerHTML=m.decisions.map((d,i)=>`<div class="decision-item"><h4>${i+1}. ${d.title}</h4><p>${d.content}</p></div>`).join('');
 }
 const funnelStages=["初步接触","方案对接","测试上量","签约交付"];
-const funnelFills=["linear-gradient(90deg,#60a5fa,#3b82f6)","linear-gradient(90deg,#fbbf24,#f59e0b)","linear-gradient(90deg,#34d399,#10b981)","linear-gradient(90deg,#a78bfa,#8b5cf6)"];
+const funnelFills=["#3B5BDB","#B45309","#047857","#6D28D9"];
 function ownerToSales(owner,sales){
   if(!owner)return null;
   for(const s of sales){
@@ -381,9 +388,9 @@ function renderFunnel(m){
   document.getElementById('funnelTeam').innerHTML=funnelHTML(teamCounts,teamValues);
   document.getElementById('funnelTeamStats').innerHTML=`
     <div class="fs"><b>${teamTotal}</b><span>漏斗内客户（家）</span></div>
-    <div class="fs"><b style="color:#93c5fd">&#165;${teamValue}万</b><span>漏斗总蓄水（年化）</span></div>
-    <div class="fs"><b style="color:#6ee7b7">${teamSigned}</b><span>已签约交付（家）</span></div>
-    <div class="fs"><b style="color:#fcd34d">${teamConv}</b><span>接触&#8594;签约 整体转化</span></div>`;
+    <div class="fs"><b>&#165;${teamValue}万</b><span>漏斗总蓄水（年化）</span></div>
+    <div class="fs"><b>${teamSigned}</b><span>已签约交付（家）</span></div>
+    <div class="fs"><b>${teamConv}</b><span>接触&#8594;签约 整体转化</span></div>`;
   document.getElementById('funnelGrid').innerHTML=m.sales.map(s=>{
     const d=byOwner[s.name]||{counts:[0,0,0,0],values:[0,0,0,0],signed:[]};
     const total=d.counts.reduce((a,b)=>a+b,0);
@@ -392,15 +399,15 @@ function renderFunnel(m){
     const topProgress=(s.progress&&s.progress[0])?s.progress[0]:'—';
     return `<div class="funnel-card">
       <div class="funnel-head"><div class="rep-avatar" style="background:${s.color}">${s.name[0]}</div><div><div class="rep-name">${s.name}</div><div class="rep-role">${s.role} · 漏斗内 ${total} 家 · &#165;${pValue}万</div></div></div>
-      <div class="funnel-progress" title="${topProgress}">&#128204; 本周重点：${topProgress}</div>
+      <div class="funnel-progress" title="${topProgress}">本周重点：${topProgress}</div>
       <div class="funnel-body">${funnelHTML(d.counts,d.values)}</div>
-      <div class="funnel-result">&#127942; 成交：${signedTxt}</div>
+      <div class="funnel-result">成交：${signedTxt}</div>
     </div>`;
   }).join('');
 }
 function toggleTodo(el){el.classList.toggle('checked');el.nextElementSibling.classList.toggle('done')}
 function addTodo(){const l=document.getElementById('todoList');const li=document.createElement('li');li.className='todo-item';li.innerHTML='<div class="todo-checkbox" onclick="toggleTodo(this)"></div><span class="todo-text" contenteditable="true">新待办事项...</span><span class="todo-owner" contenteditable="true">负责人</span>';l.appendChild(li)}
-function addKanbanCard(){const col=document.querySelector('.kanban-col');const c=document.createElement('div');c.className='kanban-card';c.contentEditable=true;c.style.border='1px dashed rgba(79,70,229,.2)';c.innerHTML='<div class="title">新客户</div><div class="owner">&#128100; 负责人</div>';col.appendChild(c)}
+function addKanbanCard(){const col=document.querySelector('.kanban-col');const c=document.createElement('div');c.className='kanban-card';c.contentEditable=true;c.style.border='1px dashed #A8A29E';c.innerHTML='<div class="title">新客户</div><div class="owner">负责人</div>';col.appendChild(c)}
 let chartsInit=false;
 function initCharts(){
   if(chartsInit)return;chartsInit=true;
@@ -460,12 +467,12 @@ function renderLeadStats(){
   const batches=new Set(LEADS.map(l=>l.batch)).size;
   document.getElementById('leadStats').innerHTML=`
     <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">累计线索</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--gray-500)">${un}</div><div class="stat-label">未跟进</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--warning)">${doing}</div><div class="stat-label">跟进中</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--success)">${won}</div><div class="stat-label">已成交</div></div>
-    <div class="stat-card"><div class="stat-value" style="color:var(--info)">${batches}</div><div class="stat-label">采集批次</div></div>`;
+    <div class="stat-card"><div class="stat-value" style="color:var(--ink-3)">${un}</div><div class="stat-label">未跟进</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#B45309">${doing}</div><div class="stat-label">跟进中</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:#047857">${won}</div><div class="stat-label">已成交</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--accent)">${batches}</div><div class="stat-label">采集批次</div></div>`;
 }
-const leadChartPalette={"未跟进":"#9ca3af","已分配":"#3b82f6","初步接触":"#f59e0b","方案对接":"#fb923c","测试上量":"#10b981","签约成交":"#8b5cf6","暂缓":"#d1d5db"};
+const leadChartPalette={"未跟进":"#A8A29E","已分配":"#3B5BDB","初步接触":"#B45309","方案对接":"#C2410C","测试上量":"#047857","签约成交":"#6D28D9","暂缓":"#D6D3D1"};
 let leadCharts={};
 function renderLeadCharts(){
   const sc={};LEADS.forEach(l=>sc[l.status]=(sc[l.status]||0)+1);
@@ -475,14 +482,18 @@ function renderLeadCharts(){
   const ic={};LEADS.forEach(l=>{const k=(l.industry||'其他').split('/')[0];ic[k]=(ic[k]||0)+1});
   const iLabels=Object.keys(ic).sort((a,b)=>ic[b]-ic[a]);
   if(leadCharts.industry)leadCharts.industry.destroy();
-  leadCharts.industry=new Chart(document.getElementById('chartLeadIndustry'),{type:'bar',data:{labels:iLabels,datasets:[{label:'线索数',data:iLabels.map(k=>ic[k]),backgroundColor:'rgba(79,70,229,.2)',borderColor:'#4f46e5',borderWidth:2,borderRadius:6}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});
+  leadCharts.industry=new Chart(document.getElementById('chartLeadIndustry'),{type:'bar',data:{labels:iLabels,datasets:[{label:'线索数',data:iLabels.map(k=>ic[k]),backgroundColor:'rgba(17,17,17,.08)',borderColor:'#111111',borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});
 }
 function addLead(){
   const today=new Date().toISOString().slice(0,10);
   LEADS.unshift({batch:today+" 手动",company:"新公司",industry:"待填写",round:"C轮",funding:"待填写",aiNeed:"待填写",contact:"未公开",source:"手动录入",owner:"",status:"未跟进"});
   initLeads();
 }
-initWeekSelector();renderAll();initLeads();
+const revealObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}});},{threshold:0.06});
+function revealInit(){document.querySelectorAll('.card:not(.reveal),.stat-card:not(.reveal),.funnel-card:not(.reveal),.rep-card:not(.reveal),.funnel-hero:not(.reveal),.insight-card:not(.reveal)').forEach((el,i)=>{el.style.setProperty('--i',i%8);el.classList.add('reveal');revealObs.observe(el);});}
+Chart.defaults.font.family='-apple-system,"SF Pro Text","PingFang SC","Segoe UI","Microsoft YaHei",sans-serif';
+Chart.defaults.color='#787774';
+initWeekSelector();renderAll();initLeads();revealInit();
 </script>
 </body>
 </html>
