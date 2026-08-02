@@ -109,17 +109,19 @@ table.leads a:hover{text-decoration:underline}
 .f-conv b{font-weight:700;color:var(--ink)}
 .f-metrics{display:flex;align-items:baseline;gap:8px}
 .f-metrics em{font-style:normal;font-family:var(--mono);font-size:11px;font-weight:600;opacity:.92}
-.funnel-hero{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:48px 44px 40px;margin-bottom:24px}
-.funnel-hero-title{font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.025em;line-height:1.05;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
-.funnel-hero-title span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--ink-2)}
+.funnel-hero{background:linear-gradient(135deg,#1e1b4b 0%,#3730a3 55%,#4c1d95 100%);border:none;border-radius:16px;padding:48px 44px 40px;margin-bottom:24px;color:#fff;box-shadow:0 16px 40px -12px rgba(30,27,75,.4)}
+.funnel-hero-title{font-family:var(--serif);font-size:28px;font-weight:400;letter-spacing:-0.025em;line-height:1.05;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;color:#fff}
+.funnel-hero-title span{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.65)}
 .funnel-hero-stats{display:flex;margin:34px 0 38px;flex-wrap:wrap;row-gap:24px}
-.funnel-hero-stats .fs{padding:0 44px;border-left:1px solid var(--line)}
+.funnel-hero-stats .fs{padding:0 44px;border-left:1px solid rgba(255,255,255,.18)}
 .funnel-hero-stats .fs:first-child{padding-left:0;border-left:none}
-.funnel-hero-stats .fs b{display:block;font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.03em;line-height:1.05;color:var(--ink)}
-.funnel-hero-stats .fs span{font-family:var(--mono);font-size:11px;color:var(--ink-2);letter-spacing:.05em}
-.funnel-hero .f-bar{padding:14px 22px;font-size:14px}
+.funnel-hero-stats .fs b{display:block;font-family:var(--serif);font-size:44px;font-weight:400;letter-spacing:-0.03em;line-height:1.05;color:#fff}
+.funnel-hero-stats .fs span{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.7);letter-spacing:.05em}
+.funnel-hero .f-bar{padding:14px 22px;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
 .funnel-hero .f-bar b{font-size:24px}
 .funnel-hero .f-metrics em{font-size:12px}
+.funnel-hero .f-conv{color:rgba(255,255,255,.7)}
+.funnel-hero .f-conv b{color:#fff}
 .funnel-team-bars{max-width:640px;margin:0 auto}
 .funnel-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;flex-direction:column;gap:11px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
 .funnel-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
@@ -342,7 +344,7 @@ function renderDecisions(m){
   document.getElementById('decisionsContent').innerHTML=m.decisions.map((d,i)=>`<div class="decision-item"><h4>${i+1}. ${d.title}</h4><p>${d.content}</p></div>`).join('');
 }
 const funnelStages=["初步接触","方案对接","测试上量","签约交付"];
-const funnelFills=["#3B5BDB","#B45309","#047857","#6D28D9"];
+const funnelFills=["linear-gradient(90deg,#60a5fa,#2563eb)","linear-gradient(90deg,#fbbf24,#d97706)","linear-gradient(90deg,#34d399,#059669)","linear-gradient(90deg,#a78bfa,#7c3aed)"];
 function ownerToSales(owner,sales){
   if(!owner)return null;
   for(const s of sales){
@@ -388,9 +390,9 @@ function renderFunnel(m){
   document.getElementById('funnelTeam').innerHTML=funnelHTML(teamCounts,teamValues);
   document.getElementById('funnelTeamStats').innerHTML=`
     <div class="fs"><b>${teamTotal}</b><span>漏斗内客户（家）</span></div>
-    <div class="fs"><b>&#165;${teamValue}万</b><span>漏斗总蓄水（年化）</span></div>
-    <div class="fs"><b>${teamSigned}</b><span>已签约交付（家）</span></div>
-    <div class="fs"><b>${teamConv}</b><span>接触&#8594;签约 整体转化</span></div>`;
+    <div class="fs"><b style="color:#93c5fd">&#165;${teamValue}万</b><span>漏斗总蓄水（年化）</span></div>
+    <div class="fs"><b style="color:#6ee7b7">${teamSigned}</b><span>已签约交付（家）</span></div>
+    <div class="fs"><b style="color:#fcd34d">${teamConv}</b><span>接触&#8594;签约 整体转化</span></div>`;
   document.getElementById('funnelGrid').innerHTML=m.sales.map(s=>{
     const d=byOwner[s.name]||{counts:[0,0,0,0],values:[0,0,0,0],signed:[]};
     const total=d.counts.reduce((a,b)=>a+b,0);
