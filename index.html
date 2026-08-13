@@ -480,8 +480,8 @@ const MEETINGS=[{
   ],
   stats:{members:5,customers:"18",todos:12,revenue:"~530万",decisions:3},
   sales:[
-    {name:"小乖",role:"销售成员",color:"#f59e0b",progress:["上海某IPC客户拓新：账号调入完成，服务器架构沟通中","制造业客户调入：账号主体问题交流完成，商务折扣沟通完成","PPL新增：IPC行业30万/年（实体账号沟通中）、制造业客户400万/年（PPU需求）","挑入7家客户：杭州星智创享、杭州金自智能、北京面壁者智能、上海七猫短剧、光启卓智(苏州)、上海鸿宇芯智能、极本复(上海)、上海湃思麦智能"],plan:["拜访制造业客户，跟进服务器进度","IPC拓新客户深度交流","参加上海AI市场活动（赛场）2场"]},
-    {name:"春晓",role:"销售成员",color:"#8b5cf6",progress:["新拓2个渠道客户，目前正在跟进中","挑入3个游戏客户，处于初期沟通阶段","预计下周拜访飞书深诺CEO，推进战略合作"],plan:["跟进2个渠道客户需求对接","推进3个游戏客户商机","准备飞书深诺CEO拜访材料"]},
+    {name:"小乖",role:"销售成员",color:"#f59e0b",ov:{初步接触:380,方案对接:120,测试上量:0,签约交付:0},progress:["上海某IPC客户拓新：账号调入完成，服务器架构沟通中","制造业客户调入：账号主体问题交流完成，商务折扣沟通完成","PPL新增：IPC行业30万/年（实体账号沟通中）、制造业客户400万/年（PPU需求）","挑入7家客户：杭州星智创享、杭州金自智能、北京面壁者智能、上海七猫短剧、光启卓智(苏州)、上海鸿宇芯智能、极本复(上海)、上海湃思麦智能"],plan:["拜访制造业客户，跟进服务器进度","IPC拓新客户深度交流","参加上海AI市场活动（赛场）2场"]},
+    {name:"春晓",role:"销售成员",color:"#8b5cf6",ov:{初步接触:50,方案对接:100,测试上量:0,签约交付:0},progress:["新拓2个渠道客户，目前正在跟进中","挑入3个游戏客户，处于初期沟通阶段","预计下周拜访飞书深诺CEO，推进战略合作"],plan:["跟进2个渠道客户需求对接","推进3个游戏客户商机","准备飞书深诺CEO拜访材料"]},
     {name:"张怡薇Ivy",role:"销售成员",color:"#ec4899",progress:["MaaS中转站客户智胜香港：完成国际站注册、美金转账，绿网关闭","机器人客户第一推力：完成账号注册、资源报备","跨境电商客户：触达沟通中"],plan:["智胜香港完成模型测试，推动上量","完成跨境电商客户邀约注册","邀约第一推力创始人参观云谷展厅"]},
     {name:"周佳润",role:"销售成员",color:"#10b981",progress:["乐美包装：Service Cloud新需求确认，投标中，年化20万","GJZF：8月7日DS部分存量接入，日代金券消耗1500元，本周切换为国际站GAAP计收","PPL新增：词元大模型业务","挑入客户：上海词元知芯科技有限公司（AI中转站，多文本/语言/视频模型接入）"],plan:["乐美包装中标下单（今日完成报价）","GJZF上量，日GAAP预计3000元","词元知芯多模型MaaS接入上量，预估日2000元以上"]},
     {name:"张新",role:"团队负责人",color:"#4f46e5",progress:["时涧信控：沟通中，需要提拉信控助力","索拉里：压测情况跟进，预计本周开始爬坡上量","爱为：本周进行CEO高拜"],plan:["协调资源提拉时涧信控","跟进索拉里压测结果，推动上量","完成爱为CEO高拜，深化合作"]}
@@ -631,6 +631,14 @@ function stageCountsByOwner(m){
       if(s&&map[s.name]){map[s.name].counts[si]++;map[s.name].values[si]+=val;if(si===3)map[s.name].signed.push(title);}
     });
   });
+  // Override values with ov field if present
+  m.sales.forEach(s=>{
+    if(s.ov&&map[s.name]){
+      funnelStages.forEach((stage,si)=>{
+        if(s.ov[stage]!==undefined)map[s.name].values[si]=s.ov[stage];
+      });
+    }
+  });
   return map;
 }
 function funnelHTML(counts,values){
@@ -650,7 +658,14 @@ function funnelHTML(counts,values){
 function renderFunnel(m){
   const byOwner=stageCountsByOwner(m);
   const teamCounts=[0,0,0,0],teamValues=[0,0,0,0];
-  funnelStages.forEach((stage,si)=>{(m.kanban[stage]||[]).forEach(card=>{teamCounts[si]++;teamValues[si]+=parseFloat(card.split('|')[3])||0;});});
+  // Sum from byOwner map (includes ov overrides)
+  m.sales.forEach(s=>{
+    const d=byOwner[s.name];
+    if(d){
+      d.counts.forEach((c,si)=>{teamCounts[si]+=c;});
+      d.values.forEach((v,si)=>{teamValues[si]+=v;});
+    }
+  });
   const teamTotal=teamCounts.reduce((a,b)=>a+b,0);
   const teamValue=teamValues.reduce((a,b)=>a+b,0);
   const teamSigned=teamCounts[3];
