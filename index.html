@@ -526,7 +526,23 @@ const MEETINGS=[{
 // ====== 数据结束 ======
 
 // ====== 潜客线索数据（由定时任务每周自动追加，按 batch 批次累积保留） ======
-const LEAD_STATUSES=["未跟进","已分配","初步接触","方案对接","测试上量","签约成交","暂缓"];
+const LEAD_STATUSES=["未跟进","已分配","初步接触","方案对接","测试上量","签约成交","暂缓"
+{batch:"2026-08-17",company:"帷幄(Whale)",industry:"营销科技MarTech",round:"C轮(C1+C2连续)",funding:"2025-05 · 合计超6000万美元",aiNeed:"品牌营销平台在营销内容生成、消费者洞察场景需调用多模态大模型API",contact:"www.meetwhale.com",source:"新浪财经",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"剂泰医药",industry:"AI制药",round:"D轮",funding:"2025 · 4亿元",aiNeed:"AI药物递送平台的分子设计与文献数据挖掘需调用/微调大模型",contact:"www.matrixtx.com",source:"创业邦",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"实在智能",industry:"AI Agent/RPA数字员工",round:"C轮",funding:"2024-02 · 近2亿元",aiNeed:"Agent智能体在客服与办公自动化场景需调用适配通用大模型API",contact:"www.ii-ai.com",source:"36氪",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"竹间智能",industry:"对话式AI/智能客服",round:"D轮",funding:"2023-02 · 超亿元",aiNeed:"企业级对话机器人与数字员工需接入通用大模型API并做行业微调",contact:"www.emotibot.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"惠每科技",industry:"医疗AI/临床决策支持",round:"D轮后新融资",funding:"2025-08 · 近2亿元",aiNeed:"CDSS、病历质控与医疗文书生成等大模型产品线需采购医疗场景MaaS服务",contact:"www.huimei.com",source:"动脉网",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"微脉",industry:"互联网医疗/全病程管理",round:"D轮",funding:"2025-01 · 2亿元",aiNeed:"AI+全病程管理的智能随访与健康咨询需大模型对话能力",contact:"未公开",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"华美浩联",industry:"数字化健康管理/健康险医疗服务",round:"D轮",funding:"2026-03 · 数亿元",aiNeed:"以AI Agent重构问诊分诊与健康咨询服务需调用通用大模型API",contact:"www.huameihaolian.com",source:"界面新闻",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"小码王",industry:"教育科技/少儿编程",round:"D轮",funding:"2025-07 · 数亿元",aiNeed:"AI编程教育的智能辅导、代码讲解与纠错需大模型能力支撑个性化教学",contact:"www.xiaomawang.com",source:"界面新闻",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"智布互联",industry:"纺织智能制造/产业互联网SaaS",round:"C++轮",funding:"2025-01 · 金额未披露(投后估值4.6亿美元)",aiNeed:"纺织工业大脑的智能排单与产业链数据洞察可能调用大模型做工艺与数据分析",contact:"未公开",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"格创东智",industry:"智能制造/工业软件",round:"C轮",funding:"2025-02 · 数亿元",aiNeed:"工厂良率分析与设备运维中工业知识问答、工艺文档与数据报告生成需大模型API",contact:"www.getech.cn",source:"36氪",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"斗象科技",industry:"网络安全",round:"战略融资(Pre-IPO)",funding:"2025-09 · 2亿元",aiNeed:"AI安全运营的告警智能研判、威胁情报摘要与攻防知识问答需大模型API",contact:"www.tophant.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"上海立芯",industry:"半导体EDA",round:"C轮",funding:"2026-06 · 超3亿元",aiNeed:"EDA工具链的设计规则知识问答、文档与脚本自动生成可采购大模型API",contact:"www.ledatech.cn",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"XTransfer",industry:"跨境电商/跨境B2B支付",round:"E轮",funding:"2026-03 · 6900万美元",aiNeed:"面向中小外贸企业的多语言营销内容生成、单据处理与智能客服需大模型API",contact:"www.xtransfer.cn",source:"新浪财经",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"蓝点触控",industry:"机器人/力觉传感器",round:"C++轮",funding:"2026 · C+与C++连续数亿元",aiNeed:"具身智能数据采集与传感器数据自动标注处理可能采购多模态大模型API",contact:"www.link-touch.com",source:"36氪",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"卓翼智能",industry:"低空经济/工业无人机",round:"C轮(战略融资)",funding:"2025-12 · 2亿元",aiNeed:"无人机巡检图像多模态分析、巡检报告自动生成需调用大模型API",contact:"www.droneyee.com",source:"投资界",owner:"",status:"未跟进"},
+{batch:"2026-08-17",company:"每刻科技",industry:"财务SaaS/费控报销",round:"C+轮",funding:"2025-02 · 数千万元",aiNeed:"AI费控的票据识别、智能审单与财务知识问答需调用大模型API",contact:"www.maycur.com",source:"投资界",owner:"",status:"未跟进"},];
 const LEAD_STATUS_COLORS={"未跟进":"#f3f4f6|#6b7280","已分配":"#dbeafe|#1e40af","初步接触":"#fef3c7|#92400e","方案对接":"#fed7aa|#9a3412","测试上量":"#d1fae5|#065f46","签约成交":"#ede9fe|#5b21b6","暂缓":"#f3f4f6|#9ca3af"};
 const LEADS=[
 {batch:"2026-07-29",company:"一目科技",industry:"具身智能/机器人触觉传感",round:"E轮",funding:"2026 Q3 · 超10亿元",aiNeed:"机器人多模态感知与规划决策需大模型推理能力支撑",contact:"未公开",source:"北京日报",owner:"",status:"未跟进"},
