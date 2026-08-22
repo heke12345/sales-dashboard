@@ -255,6 +255,37 @@ footer{border-top:1px solid var(--line);margin-top:56px;padding:36px 32px;text-a
 <script>
 // ====== 会议数据（由定时任务每周自动追加更新） ======
 const MEETINGS=[{
+  date:"2026-08-17",
+  label:"2026-08-17 东海SA/TAM双周会",
+  time:"18:52",
+  duration:"100分钟",
+  participants:21,
+  summary:"2026年8月17日东海SA/TAM双周会，对齐SDD（Spec-Driven Development）标准化方案落地路径。会议重点介绍基于特来电最佳实践提炼的6个Skill标准交付流程（环境体检建档→Spec撰写→Spec评审→双轨交付→交付前验收→AI Trace项目轨迹审计），与Qoder Quest Mode、OpenSpec形成按客户成熟度分级的差异化组合：初级尝鲜客户用Quest Mode快速跑通，重度/强规范客户用6-Skill方案沉淀自有规范、实现流程可控。同时同步千问办公（Qwen Work）推广中的钉钉协同摩擦问题，明确即日起客户测试统一走官方POC申请流程，禁止先下单后补券；并分享了基于HAR录制+AI生成脚本的内部数据自动化抓取技巧。<br><br><strong>核心共识：</strong>SDD方案核心价值在于拉齐客户开发标准、建立技术信任，而非单纯技术优越性；需在1-2周内完成Kiro、CodeBody等竞品调研，避免闭门造车。",
+  insights:[
+    {title:"产品与服务的边界重构",content:"AI Coding工具同质化背景下，核心竞争力从单一功能强弱转向能否提供可落地的工程化规范。SDD 6-Skill方案本质是将咨询服务产品化，预置流程降低企业采纳AI的认知与操作门槛。"},
+    {title:"上下文管理的范式转移",content:"从单一大模型窗口向多Agent协同+持久化状态转变。拆分Skill并独立会话，通过读取持久化文件关联上下文，有效解决长链路开发中的Token限制与注意力分散问题。"},
+    {title:"内部工具外部化潜力",content:"HAR录制+AI生成脚本的录制即开发模式极易被非技术人员接受，可作为Qoder在运营、财务等非研发场景的破局点。"}
+  ],
+  stats:{members:1,customers:"—",todos:5,revenue:"—",decisions:4},
+  sales:[
+    {name:"团队",role:"SA/TAM 双周会",color:"#4338CA",progress:["SDD标准化：基于特来电实践提炼6个Skill流程（环境体检、Spec撰写、Spec评审、双轨交付、交付前验收、AI Trace），Demo以开源电商项目验证冲突发现与上下文管理","方案分级：初级客户用Quest Mode、开源偏好客户用OpenSpec、重度强规范客户用6-Skill方案","千问办公推广：存在钉钉协同摩擦与信息断层，待阿里云与钉钉整合后理顺生产关系","内部效率：HAR文件录制+Qoder生成自动化脚本，定时抓取鲲鹏系统客户订单与模型调用数据"],plan:["秦一鸣牵头1-2周内完成Kiro、CodeBody竞品调研并输出报告","联系特来电IC了解Quest Mode未使用的落地痛点","统一千问办公POC申请流程并同步全员","将HAR数据抓取方法封装为标准Skill推广给BTE/运营团队"]}
+  ],
+  todos:[
+    {owner:"秦一鸣",text:"补充6个Skill各步产物说明及人工价值文档"},
+    {owner:"秦一鸣",text:"联合戚海峰、TAM-枫桥-Garvin及特来电IC调研Quest模式实际落地情况"},
+    {owner:"秦一鸣",text:"牵头组建虚拟小组，分工调研Tree/Kara/CodeBody三款产品Spec驱动实践"},
+    {owner:"榆荫堂",text:"明确千问办公POC流程执行规范并同步全员"},
+    {owner:"榆荫堂",text:"牵头构建客户消费洞察Skill并交付，由光统一负责千问办公Skill交付对接"}
+  ],
+  decisions:[
+    {title:"SDD标准化方案推进方向",content:"确认以6个Skill作为面向重度企业客户的标准交付框架，通过流程规范化拉齐客户内部开发水平、建立技术信任。该方案与Qoder Quest Mode不互斥，针对不同成熟度客户提供差异化选择，需尽快完善话术和交付材料，成为SA/BTE核心抓手。"},
+    {title:"竞品调研任务分工与时效",content:"成立虚拟小组，由秦一鸣牵头，分工调研Kiro、CodeBody及特来电实际落地情况，要求1-2周内输出调研报告，明确我方方案差异化优势及改进点，下次周会二次分享对齐。"},
+    {title:"千问办公POC流程规范",content:"即日起所有千问办公客户测试需求统一走官方POC申请流程，禁止先下单后补券等非标准操作，消除与钉钉团队的协同摩擦，确保合规性。"},
+    {title:"内部数据自动化Skill推广",content:"认可基于HAR文件录制生成自动化数据抓取Skill的方法论，封装为标准模板在内部运营和销售团队推广，提升客户数据监控效率和线索捕捉能力。"}
+  ],
+  kanban:{"初步接触":[],"方案对接":[],"测试上量":[],"签约交付":[]},
+  uuid:"76327569643430393032373031335f31333932343336355f39"
+},{
     "date": "2026-07-27",
     "label": "2026-07-27 拓新周会",
     "time": "16:56",
@@ -526,23 +557,7 @@ const MEETINGS=[{
 // ====== 数据结束 ======
 
 // ====== 潜客线索数据（由定时任务每周自动追加，按 batch 批次累积保留） ======
-const LEAD_STATUSES=["未跟进","已分配","初步接触","方案对接","测试上量","签约成交","暂缓"
-{batch:"2026-08-17",company:"帷幄(Whale)",industry:"营销科技MarTech",round:"C轮(C1+C2连续)",funding:"2025-05 · 合计超6000万美元",aiNeed:"品牌营销平台在营销内容生成、消费者洞察场景需调用多模态大模型API",contact:"www.meetwhale.com",source:"新浪财经",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"剂泰医药",industry:"AI制药",round:"D轮",funding:"2025 · 4亿元",aiNeed:"AI药物递送平台的分子设计与文献数据挖掘需调用/微调大模型",contact:"www.matrixtx.com",source:"创业邦",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"实在智能",industry:"AI Agent/RPA数字员工",round:"C轮",funding:"2024-02 · 近2亿元",aiNeed:"Agent智能体在客服与办公自动化场景需调用适配通用大模型API",contact:"www.ii-ai.com",source:"36氪",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"竹间智能",industry:"对话式AI/智能客服",round:"D轮",funding:"2023-02 · 超亿元",aiNeed:"企业级对话机器人与数字员工需接入通用大模型API并做行业微调",contact:"www.emotibot.com",source:"投资界",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"惠每科技",industry:"医疗AI/临床决策支持",round:"D轮后新融资",funding:"2025-08 · 近2亿元",aiNeed:"CDSS、病历质控与医疗文书生成等大模型产品线需采购医疗场景MaaS服务",contact:"www.huimei.com",source:"动脉网",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"微脉",industry:"互联网医疗/全病程管理",round:"D轮",funding:"2025-01 · 2亿元",aiNeed:"AI+全病程管理的智能随访与健康咨询需大模型对话能力",contact:"未公开",source:"投资界",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"华美浩联",industry:"数字化健康管理/健康险医疗服务",round:"D轮",funding:"2026-03 · 数亿元",aiNeed:"以AI Agent重构问诊分诊与健康咨询服务需调用通用大模型API",contact:"www.huameihaolian.com",source:"界面新闻",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"小码王",industry:"教育科技/少儿编程",round:"D轮",funding:"2025-07 · 数亿元",aiNeed:"AI编程教育的智能辅导、代码讲解与纠错需大模型能力支撑个性化教学",contact:"www.xiaomawang.com",source:"界面新闻",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"智布互联",industry:"纺织智能制造/产业互联网SaaS",round:"C++轮",funding:"2025-01 · 金额未披露(投后估值4.6亿美元)",aiNeed:"纺织工业大脑的智能排单与产业链数据洞察可能调用大模型做工艺与数据分析",contact:"未公开",source:"投资界",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"格创东智",industry:"智能制造/工业软件",round:"C轮",funding:"2025-02 · 数亿元",aiNeed:"工厂良率分析与设备运维中工业知识问答、工艺文档与数据报告生成需大模型API",contact:"www.getech.cn",source:"36氪",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"斗象科技",industry:"网络安全",round:"战略融资(Pre-IPO)",funding:"2025-09 · 2亿元",aiNeed:"AI安全运营的告警智能研判、威胁情报摘要与攻防知识问答需大模型API",contact:"www.tophant.com",source:"投资界",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"上海立芯",industry:"半导体EDA",round:"C轮",funding:"2026-06 · 超3亿元",aiNeed:"EDA工具链的设计规则知识问答、文档与脚本自动生成可采购大模型API",contact:"www.ledatech.cn",source:"投资界",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"XTransfer",industry:"跨境电商/跨境B2B支付",round:"E轮",funding:"2026-03 · 6900万美元",aiNeed:"面向中小外贸企业的多语言营销内容生成、单据处理与智能客服需大模型API",contact:"www.xtransfer.cn",source:"新浪财经",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"蓝点触控",industry:"机器人/力觉传感器",round:"C++轮",funding:"2026 · C+与C++连续数亿元",aiNeed:"具身智能数据采集与传感器数据自动标注处理可能采购多模态大模型API",contact:"www.link-touch.com",source:"36氪",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"卓翼智能",industry:"低空经济/工业无人机",round:"C轮(战略融资)",funding:"2025-12 · 2亿元",aiNeed:"无人机巡检图像多模态分析、巡检报告自动生成需调用大模型API",contact:"www.droneyee.com",source:"投资界",owner:"",status:"未跟进"},
-{batch:"2026-08-17",company:"每刻科技",industry:"财务SaaS/费控报销",round:"C+轮",funding:"2025-02 · 数千万元",aiNeed:"AI费控的票据识别、智能审单与财务知识问答需调用大模型API",contact:"www.maycur.com",source:"投资界",owner:"",status:"未跟进"},];
+const LEAD_STATUSES=["未跟进","已分配","初步接触","方案对接","测试上量","签约成交","暂缓"];
 const LEAD_STATUS_COLORS={"未跟进":"#f3f4f6|#6b7280","已分配":"#dbeafe|#1e40af","初步接触":"#fef3c7|#92400e","方案对接":"#fed7aa|#9a3412","测试上量":"#d1fae5|#065f46","签约成交":"#ede9fe|#5b21b6","暂缓":"#f3f4f6|#9ca3af"};
 const LEADS=[
 {batch:"2026-07-29",company:"一目科技",industry:"具身智能/机器人触觉传感",round:"E轮",funding:"2026 Q3 · 超10亿元",aiNeed:"机器人多模态感知与规划决策需大模型推理能力支撑",contact:"未公开",source:"北京日报",owner:"",status:"未跟进"},
